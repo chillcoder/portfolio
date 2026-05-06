@@ -45,3 +45,6 @@ Set `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST` (e.g. `https://us.i.po
 ### Optional: Upstash Redis
 
 In Vercel: **Storage → Marketplace → Upstash Redis** and connect. Used for rotating Spotify refresh tokens.
+
+
+  
