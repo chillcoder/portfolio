@@ -29,10 +29,13 @@ const QUERY = /* GraphQL */ `
   }
 `;
 
-const GITHUB_USERNAME = "lucas-obrien";
+function githubLogin(): string {
+  return process.env.GITHUB_LOGIN ?? "lucas-obrien";
+}
 
 export async function GET(req: Request) {
   const distinctId = getDistinctIdFromHeaders(req.headers);
+  const login = githubLogin();
   const token = process.env.GITHUB_TOKEN;
 
   if (!token) {
@@ -41,7 +44,7 @@ export async function GET(req: Request) {
       { reason: "missing_token" },
       distinctId,
     );
-    return NextResponse.json(emptyPayload(), { status: 200 });
+    return NextResponse.json(emptyPayload(login), { status: 200 });
   }
 
   try {
@@ -53,7 +56,7 @@ export async function GET(req: Request) {
       },
       body: JSON.stringify({
         query: QUERY,
-        variables: { login: GITHUB_USERNAME },
+        variables: { login },
       }),
       next: { revalidate: 300 },
     });
@@ -89,7 +92,7 @@ export async function GET(req: Request) {
       commitsLast7d: last7.reduce((sum, d) => sum + d.contributionCount, 0),
       totalContributions: calendar?.totalContributions ?? 0,
       daily: last30.map((d) => ({ date: d.date, count: d.contributionCount })),
-      username: GITHUB_USERNAME,
+      username: login,
     };
 
     captureServerEvent(
@@ -105,15 +108,15 @@ export async function GET(req: Request) {
       { reason: error instanceof Error ? error.message : "unknown" },
       distinctId,
     );
-    return NextResponse.json(emptyPayload(), { status: 200 });
+    return NextResponse.json(emptyPayload(login), { status: 200 });
   }
 }
 
-function emptyPayload(): GithubStatsResponse {
+function emptyPayload(login: string): GithubStatsResponse {
   return {
     commitsLast7d: 0,
     totalContributions: 0,
     daily: [],
-    username: GITHUB_USERNAME,
+    username: login,
   };
 }

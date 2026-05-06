@@ -4,9 +4,9 @@ import Image from "next/image";
 import { track } from "@/lib/track";
 
 const TWEETS = [
-  { id: "1", src: "/tweet-1.png", alt: "Tweet screenshot 1" },
-  { id: "2", src: "/tweet-2.png", alt: "Tweet screenshot 2" },
-  { id: "3", src: "/tweet-3.png", alt: "Tweet screenshot 3" },
+  { id: "1", src: "/tweet-1.svg", alt: "Tweet screenshot 1" },
+  { id: "2", src: "/tweet-2.svg", alt: "Tweet screenshot 2" },
+  { id: "3", src: "/tweet-3.svg", alt: "Tweet screenshot 3" },
 ];
 
 export default function TweetsPage() {
@@ -24,6 +24,7 @@ export default function TweetsPage() {
               alt={tweet.alt}
               width={1200}
               height={675}
+              unoptimized
               className="h-auto w-full rounded-lg"
               onLoad={() => track("tweet_viewed", { id: tweet.id, index: idx })}
             />

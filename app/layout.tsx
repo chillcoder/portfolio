@@ -3,7 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import "./global.css";
 import { LenisProvider } from "@/components/providers/LenisProvider";
-import { PostHogProvider } from "@/components/providers/PostHogProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -75,9 +74,7 @@ export default function RootLayout({
         </Script>
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <PostHogProvider>
-          <LenisProvider>{children}</LenisProvider>
-        </PostHogProvider>
+        <LenisProvider>{children}</LenisProvider>
       </body>
     </html>
   );
