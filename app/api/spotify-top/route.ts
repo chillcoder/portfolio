@@ -1,0 +1,79 @@
+import { NextResponse } from "next/server";
+import { getSpotifyAccessToken } from "@/lib/spotify";
+import { captureServerEvent, getDistinctIdFromHeaders } from "@/lib/posthogServer";
+
+export const revalidate = 3600;
+
+interface TopArtist {
+  name: string;
+  image: string | null;
+  url: string;
+}
+interface TopTrack {
+  name: string;
+  artist: string;
+  image: string | null;
+  url: string;
+}
+
+export interface SpotifyTopResponse {
+  topArtists: TopArtist[];
+  topTracks: TopTrack[];
+}
+
+export async function GET(req: Request) {
+  const distinctId = getDistinctIdFromHeaders(req.headers);
+  try {
+    const token = await getSpotifyAccessToken();
+    if (!token) {
+      captureServerEvent("spotify_top_error", { reason: "no_token" }, distinctId);
+      return NextResponse.json({ topArtists: [], topTracks: [] } satisfies SpotifyTopResponse);
+    }
+
+    const [artistsRes, tracksRes] = await Promise.all([
+      fetch(
+        "https://api.spotify.com/v1/me/top/artists?limit=5&time_range=short_term",
+        { headers: { Authorization: `Bearer ${token}` }, next: { revalidate: 3600 } },
+      ),
+      fetch(
+        "https://api.spotify.com/v1/me/top/tracks?limit=5&time_range=short_term",
+        { headers: { Authorization: `Bearer ${token}` }, next: { revalidate: 3600 } },
+      ),
+    ]);
+
+    const topArtists: TopArtist[] = artistsRes.ok
+      ? ((await artistsRes.json()) as {
+          items?: { name: string; images: { url: string }[]; external_urls?: { spotify?: string } }[];
+        }).items?.map((a) => ({
+          name: a.name,
+          image: a.images?.[0]?.url ?? null,
+          url: a.external_urls?.spotify ?? "https://open.spotify.com",
+        })) ?? []
+      : [];
+
+    const topTracks: TopTrack[] = tracksRes.ok
+      ? ((await tracksRes.json()) as {
+          items?: {
+            name: string;
+            artists: { name: string }[];
+            album: { images: { url: string }[] };
+            external_urls?: { spotify?: string };
+          }[];
+        }).items?.map((t) => ({
+          name: t.name,
+          artist: t.artists.map((a) => a.name).join(", "),
+          image: t.album.images?.[0]?.url ?? null,
+          url: t.external_urls?.spotify ?? "https://open.spotify.com",
+        })) ?? []
+      : [];
+
+    return NextResponse.json({ topArtists, topTracks } satisfies SpotifyTopResponse);
+  } catch (error) {
+    captureServerEvent(
+      "spotify_top_error",
+      { reason: error instanceof Error ? error.message : "unknown" },
+      distinctId,
+    );
+    return NextResponse.json({ topArtists: [], topTracks: [] } satisfies SpotifyTopResponse);
+  }
+}
