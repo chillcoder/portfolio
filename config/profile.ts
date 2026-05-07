@@ -1,19 +1,18 @@
 /**
  * Single source of truth for personal/profile content rendered on the dashboard.
- * Edit this file to rebrand the portfolio.
+ * Aligned with resume (2026).
  */
 
 export const PROFILE = {
   name: "Lucas O'Brien",
   shortName: "Lucas",
-  title: "Builder, traveler, photographer",
+  title: "Customer Success & AI implementation",
   location: "San Francisco, CA",
   homeCoords: { lat: 37.7749, lng: -122.4194 },
   domain: "lucas-obrien.com",
-  email: "hello@lucas-obrien.com",
-  // Used by the experience tile to compute years in tech
-  careerStart: new Date("2018-06-01"),
-  bio: "I build calm, useful product surfaces. I travel a lot and shoot photos when the light is right.",
+  email: "lucasobrien123@gmail.com",
+  careerStart: new Date("2019-08-01"),
+  bio: "I bridge technical AI implementation with revenue and retention—enterprise CS at Juniper Square, with a concurrent AI Guild role shipping internal tools in Claude Code. I translate business cases into shipped apps that help CS and GTM scale.",
   socials: {
     github: "https://github.com/chillcoder",
     twitter: "https://x.com/lucas_obrien",
@@ -24,16 +23,28 @@ export const PROFILE = {
 } as const;
 
 export const ABOUT_FACTS: { label: string; value: string }[] = [
-  { label: "Currently", value: "Building product at a Series B startup" },
-  { label: "Hometown", value: "Boulder, CO" },
-  { label: "Reading", value: "Mostly nonfiction, design + history" },
-  { label: "Listening", value: "Indie folk, jazz, ambient" },
-  { label: "Camera", value: "Fujifilm X100V" },
+  {
+    label: "Currently",
+    value:
+      "CS AI Developer (AI Guild) + Senior CSM at Juniper Square—B2B investment management software",
+  },
+  {
+    label: "Impact",
+    value:
+      "115% net retention across 70+ accounts (~$6.3M ARR); $1.7M expansion ARR in 2025 from usage-led motions",
+  },
+  {
+    label: "Earlier",
+    value:
+      "HackerRank—enterprise pipeline and technical discovery; built Python/SQL tooling for reporting",
+  },
+  { label: "Education", value: "UCSB B.S. Economics; Professional Graduate Certificate in Technology Management" },
+  { label: "Also", value: "Travel and photography when the light is right" },
 ];
 
 export const QUOTE = {
-  text: "Make it useful, then make it beautiful.",
-  attribution: "—  studio mantra",
+  text: "Translate the business case into something shipped—then scale it for the team.",
+  attribution: "— how I work with CS & GTM",
 };
 
 export interface WorkRole {
@@ -47,53 +58,92 @@ export interface WorkRole {
 
 export const WORK: WorkRole[] = [
   {
-    company: "Acme Software",
-    role: "Senior Product Engineer",
-    start: "2023",
+    company: "Juniper Square",
+    role: "CS AI Developer, AI Guild (concurrent with Senior CSM)",
+    start: "Mar 2026",
     end: "Present",
-    summary: "Leading the platform pod across infra and DX surfaces.",
+    summary:
+      "Production internal applications with Claude Code—discovery through delivery for CS and GTM.",
     bullets: [
-      "Designed v2 plugin runtime cutting cold-start latency 4x.",
-      "Owned hiring loop for the foundations team (5 hires).",
+      "Ship tooling that contextualizes customer data, speeds responses, surfaces product knowledge, and automates account health scoring—less manual CSM work, better coverage.",
+      "Partner with CS and GTM to turn business cases into fully built internal apps.",
     ],
   },
   {
-    company: "Northstar Labs",
-    role: "Product Engineer",
-    start: "2020",
-    end: "2023",
-    summary: "Full-stack feature delivery on a small product team.",
+    company: "Juniper Square",
+    role: "Senior Customer Success Manager",
+    start: "Nov 2024",
+    end: "Present",
+    summary: "Enterprise and mid-market adoption across a large book of business.",
     bullets: [
-      "Shipped real-time collab system on top of Yjs and Postgres.",
-      "Built billing + entitlement system from scratch.",
+      "Drive adoption across 70+ accounts (~$6.3M ARR); 115% net retention via technical enablement, expansion, and scaled digital engagement.",
+      "$1.7M expansion ARR in 2025 from usage data, health scoring, and timely expansion plays.",
+      "Advise executives and enable technical/ops teams; scalable AI and product enablement workshops across segments.",
+      "Voice of customer with Product—roadmap input, beta programs, GTM for new features.",
     ],
   },
   {
-    company: "Field Studio",
-    role: "Software Engineer",
-    start: "2018",
-    end: "2020",
-    summary: "Agency work for early-stage product teams.",
-    bullets: ["Shipped 12+ client products across React, Next.js, and Rails."],
+    company: "Juniper Square",
+    role: "Customer Success Manager",
+    start: "Aug 2022",
+    end: "2024",
+    summary: "Onboarding, adoption playbooks, and early AI product guidance.",
+    bullets: [
+      "Structured onboarding and repeatable adoption processes that scaled across CX.",
+      "Led early AI product adoption with value articulation, technical enablement, and stakeholder alignment.",
+    ],
+  },
+  {
+    company: "Juniper Square",
+    role: "Senior Institutional Reporting Analyst",
+    start: "Apr 2022",
+    end: "Aug 2022",
+    summary: "Data model SME and reporting at scale.",
+    bullets: [
+      "Go-to for Support, CSM, and Technical Consulting on data integrations and connectivity.",
+      "With Product, streamlined quarterly reporting across ~$250B equity—~40% faster delivery via analytics and process redesign.",
+    ],
+  },
+  {
+    company: "HackerRank",
+    role: "Senior Enterprise Sales Development & Small Market Sales Executive",
+    start: "Jan 2020",
+    end: "Mar 2021",
+    summary: "New business and technical discovery for developer-focused SaaS.",
+    bullets: [
+      "Beat quota; ~$4.5M pipeline converting to ~$1.2M new ARR through technical discovery and developer audience enablement.",
+      "Built internal Python/SQL tooling for pipeline tracking and reporting.",
+    ],
+  },
+  {
+    company: "HackerRank",
+    role: "Enterprise Sales Development",
+    start: "Aug 2019",
+    end: "Jan 2020",
+    summary: "Technical demos and enterprise discovery.",
+    bullets: ["Technical product demos and discovery with enterprise teams; 120%+ quota."],
   },
 ];
 
 export const SKILLS: string[] = [
-  "TypeScript",
-  "React",
-  "Next.js",
-  "Node.js",
-  "Postgres",
-  "Redis",
-  "Tailwind",
-  "GraphQL",
-  "tRPC",
-  "Rust",
-  "Go",
-  "AWS",
-  "Vercel",
-  "Figma",
-  "Lightroom",
+  "Customer success",
+  "Executive advisory",
+  "Usage analytics",
+  "Health scoring",
+  "Enablement & training",
+  "Salesforce",
+  "Looker",
+  "Tableau",
+  "Jira",
+  "Claude Code",
+  "Cursor",
+  "Python",
+  "SQL",
+  "REST APIs",
+  "Webhooks",
+  "Prompt engineering",
+  "AI agents",
+  "Change management",
 ];
 
 export interface Education {
@@ -107,18 +157,11 @@ export interface Education {
 
 export const EDUCATION: Education[] = [
   {
-    school: "University of Colorado Boulder",
-    degree: "B.S. Computer Science",
+    school: "University of California, Santa Barbara",
+    degree: "B.S. Economics",
     start: "2014",
     end: "2018",
-    details: "Minor in Studio Arts. Distinguished Engineering Project award.",
-    coursework: [
-      "Distributed Systems",
-      "Operating Systems",
-      "Compilers",
-      "HCI",
-      "Computational Photography",
-    ],
+    details: "June 2018. Professional Graduate Certificate in Technology Management.",
   },
 ];
 
@@ -129,26 +172,7 @@ export interface Certification {
   initials: string;
 }
 
-export const CERTIFICATIONS: Certification[] = [
-  {
-    name: "AWS Certified Solutions Architect — Associate",
-    issuer: "Amazon Web Services",
-    href: "https://www.credly.com/users/lucas-obrien",
-    initials: "AWS",
-  },
-  {
-    name: "Google Professional Cloud Architect",
-    issuer: "Google Cloud",
-    href: "https://www.credly.com/users/lucas-obrien",
-    initials: "GCP",
-  },
-  {
-    name: "HashiCorp Certified: Terraform Associate",
-    issuer: "HashiCorp",
-    href: "https://www.credly.com/users/lucas-obrien",
-    initials: "TF",
-  },
-];
+export const CERTIFICATIONS: Certification[] = [];
 
 export interface Project {
   name: string;
@@ -160,24 +184,25 @@ export interface Project {
 
 export const PROJECTS: Project[] = [
   {
-    name: "Tilemaker",
-    description: "Bento-style portfolio template; live API tiles + smooth motion.",
-    href: "https://github.com/lucas-obrien/tilemaker",
+    name: "lucas-obrien.com",
+    description: "This portfolio—bento dashboard with live tiles (GitHub, Spotify, travel globe, photos).",
+    href: "https://github.com/chillcoder/portfolio",
     status: "live",
-    tags: ["next.js", "tailwind", "gsap"],
+    tags: ["next.js", "tailwind", "posthog"],
   },
   {
-    name: "Roamlog",
-    description: "A quiet travel journal that auto-collects city visits from your photos.",
-    href: "https://github.com/lucas-obrien/roamlog",
+    name: "AI Guild internal tooling",
+    description:
+      "Production internal apps at Juniper Square—Claude Code, CS/GTM workflows, health and knowledge automation.",
+    href: "https://www.linkedin.com/in/lucas-obrien",
     status: "wip",
-    tags: ["expo", "exif", "supabase"],
+    tags: ["claude code", "internal tools", "cs"],
   },
   {
-    name: "Frame.io clone",
-    description: "Side-by-side video review tool with timestamped comments.",
-    href: "https://github.com/lucas-obrien/frameio-clone",
+    name: "Pipeline & reporting utilities",
+    description: "Python/SQL tooling for pipeline tracking and reporting (HackerRank era).",
+    href: "https://github.com/chillcoder",
     status: "archived",
-    tags: ["react", "ffmpeg"],
+    tags: ["python", "sql"],
   },
 ];

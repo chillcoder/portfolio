@@ -17,23 +17,24 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL("https://lucas-obrien.com"),
   title: {
-    default: "Lucas O'Brien — Builder, traveler, photographer",
+    default: "Lucas O'Brien — Customer Success, AI implementation, SF",
     template: "%s · Lucas O'Brien",
   },
   description:
-    "Personal portfolio of Lucas O'Brien — live signals from coding, listening, travel, and photography.",
+    "Lucas O'Brien — enterprise customer success and AI Guild builder at Juniper Square; CS, GTM tooling, and travel.",
   openGraph: {
     type: "website",
     title: "Lucas O'Brien",
     description:
-      "Personal portfolio of Lucas O'Brien — live signals from coding, listening, travel, and photography.",
+      "Enterprise CS and AI implementation—Juniper Square. Portfolio, integrations, and side interests.",
     url: "https://lucas-obrien.com",
     siteName: "Lucas O'Brien",
   },
   twitter: {
     card: "summary_large_image",
     title: "Lucas O'Brien",
-    description: "Builder, traveler, photographer.",
+    description:
+      "Customer Success & AI implementation — Juniper Square, San Francisco.",
   },
   robots: {
     index: true,
