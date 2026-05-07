@@ -30,7 +30,7 @@ const QUERY = /* GraphQL */ `
 `;
 
 function githubLogin(): string {
-  return process.env.GITHUB_LOGIN ?? "lucas-obrien";
+  return process.env.GITHUB_LOGIN ?? "chillcoder";
 }
 
 export async function GET(req: Request) {

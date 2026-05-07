@@ -15,7 +15,7 @@ export const PROFILE = {
   careerStart: new Date("2018-06-01"),
   bio: "I build calm, useful product surfaces. I travel a lot and shoot photos when the light is right.",
   socials: {
-    github: "https://github.com/lucas-obrien",
+    github: "https://github.com/chillcoder",
     twitter: "https://x.com/lucas_obrien",
     linkedin: "https://www.linkedin.com/in/lucas-obrien",
     instagram: "https://instagram.com/lucas.obrien",

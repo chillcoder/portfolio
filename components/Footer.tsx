@@ -2,13 +2,12 @@
 
 import Link from "next/link";
 import { PROFILE } from "@/config/profile";
-import { track } from "@/lib/track";
+import { SocialIconLinks } from "@/components/SocialIconLinks";
 
 const FOOTER_LINKS: { label: string; href: string; external?: boolean }[] = [
   { label: "Privacy", href: "/privacy" },
   { label: "Terms", href: "/terms" },
   { label: "Tweets", href: "/tweets" },
-  { label: "GitHub", href: PROFILE.socials.github, external: true },
 ];
 
 export function Footer() {
@@ -18,32 +17,21 @@ export function Footer() {
         <p className="font-mono">
           © {new Date().getFullYear()} {PROFILE.name}. Built in {PROFILE.location}.
         </p>
-        <nav className="flex flex-wrap items-center gap-4">
-          {FOOTER_LINKS.map((link) =>
-            link.external ? (
-              <a
-                key={link.href}
-                href={link.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() =>
-                  track("external_link_clicked", { source: "footer", url: link.href })
-                }
-                className="hover:text-[var(--color-fg)]"
-              >
-                {link.label}
-              </a>
-            ) : (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="hover:text-[var(--color-fg)]"
-              >
+        <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-6">
+          <nav className="flex flex-wrap items-center gap-4" aria-label="Legal and pages">
+            {FOOTER_LINKS.map((link) => (
+              <Link key={link.href} href={link.href} className="hover:text-[var(--color-fg)]">
                 {link.label}
               </Link>
-            ),
-          )}
-        </nav>
+            ))}
+          </nav>
+          <nav
+            className="flex items-center gap-1 border-t border-[var(--color-border)] pt-4 sm:border-t-0 sm:pt-0 sm:pl-4 md:border-l md:pl-6"
+            aria-label="Social links"
+          >
+            <SocialIconLinks source="footer" />
+          </nav>
+        </div>
       </div>
     </footer>
   );

@@ -3,14 +3,7 @@
 import { PROFILE } from "@/config/profile";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { NowPlayingMarquee } from "@/components/NowPlayingMarquee";
-import { track } from "@/lib/track";
-
-const SOCIAL_LINKS: { label: string; href: string }[] = [
-  { label: "GH", href: PROFILE.socials.github },
-  { label: "LI", href: PROFILE.socials.linkedin },
-  { label: "X", href: PROFILE.socials.twitter },
-  { label: "IG", href: PROFILE.socials.instagram },
-];
+import { SocialIconLinks } from "@/components/SocialIconLinks";
 
 export function Header() {
   function scrollToTop() {
@@ -37,21 +30,8 @@ export function Header() {
           {PROFILE.shortName}.
         </button>
         <NowPlayingMarquee />
-        <nav className="flex items-center gap-1">
-          {SOCIAL_LINKS.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() =>
-                track("external_link_clicked", { source: "header", url: link.href })
-              }
-              className="grid size-9 place-items-center rounded-full font-mono text-[10px] uppercase tracking-wider text-[var(--color-fg-muted)] transition hover:bg-[var(--color-tile)] hover:text-[var(--color-fg)]"
-            >
-              {link.label}
-            </a>
-          ))}
+        <nav className="flex items-center gap-1" aria-label="Social links">
+          <SocialIconLinks source="header" />
           <ThemeToggle />
         </nav>
       </div>
