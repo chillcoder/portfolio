@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSpotifyAccessToken } from "@/lib/spotify";
+import { isSpotifyMusicTrack } from "@/lib/spotifyMusic";
 import { captureServerEvent, getDistinctIdFromHeaders } from "@/lib/posthogServer";
 
 export const revalidate = 30;
@@ -33,13 +34,16 @@ export async function GET(req: Request) {
       const json = (await playing.json()) as {
         is_playing?: boolean;
         item?: {
+          type?: string;
+          uri?: string;
+          show?: unknown;
           name: string;
           album: { name: string; images: { url: string }[] };
           artists: { name: string }[];
           external_urls?: { spotify?: string };
         };
       };
-      if (json.item) {
+      if (json.item && isSpotifyMusicTrack(json.item)) {
         return NextResponse.json({
           isPlaying: !!json.is_playing,
           song: json.item.name,
@@ -52,7 +56,7 @@ export async function GET(req: Request) {
     }
 
     const recent = await fetch(
-      "https://api.spotify.com/v1/me/player/recently-played?limit=1",
+      "https://api.spotify.com/v1/me/player/recently-played?limit=50",
       {
         headers: { Authorization: `Bearer ${token}` },
         cache: "no-store",
@@ -64,6 +68,9 @@ export async function GET(req: Request) {
         items?: {
           played_at: string;
           track: {
+            type?: string;
+            uri?: string;
+            show?: unknown;
             name: string;
             album: { name: string; images: { url: string }[] };
             artists: { name: string }[];
@@ -71,16 +78,18 @@ export async function GET(req: Request) {
           };
         }[];
       };
-      const item = json.items?.[0];
-      if (item) {
+
+      for (const row of json.items ?? []) {
+        const tr = row.track;
+        if (!isSpotifyMusicTrack(tr)) continue;
         return NextResponse.json({
           isPlaying: false,
-          song: item.track.name,
-          artist: item.track.artists.map((a) => a.name).join(", "),
-          album: item.track.album.name,
-          albumImage: item.track.album.images?.[0]?.url ?? null,
-          url: item.track.external_urls?.spotify,
-          lastPlayedAt: item.played_at,
+          song: tr.name,
+          artist: tr.artists.map((a) => a.name).join(", "),
+          album: tr.album.name,
+          albumImage: tr.album.images?.[0]?.url ?? null,
+          url: tr.external_urls?.spotify,
+          lastPlayedAt: row.played_at,
         } satisfies SpotifyStats);
       }
     }

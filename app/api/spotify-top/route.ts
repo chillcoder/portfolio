@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSpotifyAccessToken } from "@/lib/spotify";
+import { isSpotifyMusicTrack } from "@/lib/spotifyMusic";
 import { captureServerEvent, getDistinctIdFromHeaders } from "@/lib/posthogServer";
 
 export const revalidate = 3600;
@@ -54,17 +55,21 @@ export async function GET(req: Request) {
     const topTracks: TopTrack[] = tracksRes.ok
       ? ((await tracksRes.json()) as {
           items?: {
+            type?: string;
+            uri?: string;
             name: string;
             artists: { name: string }[];
             album: { images: { url: string }[] };
             external_urls?: { spotify?: string };
           }[];
-        }).items?.map((t) => ({
-          name: t.name,
-          artist: t.artists.map((a) => a.name).join(", "),
-          image: t.album.images?.[0]?.url ?? null,
-          url: t.external_urls?.spotify ?? "https://open.spotify.com",
-        })) ?? []
+        }).items
+          ?.filter((t) => isSpotifyMusicTrack(t))
+          .map((t) => ({
+            name: t.name,
+            artist: t.artists.map((a) => a.name).join(", "),
+            image: t.album.images?.[0]?.url ?? null,
+            url: t.external_urls?.spotify ?? "https://open.spotify.com",
+          })) ?? []
       : [];
 
     return NextResponse.json({ topArtists, topTracks } satisfies SpotifyTopResponse);
