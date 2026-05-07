@@ -8,7 +8,6 @@ import { SkillsTile } from "@/components/tiles/SkillsTile";
 import { AboutTile } from "@/components/tiles/AboutTile";
 import { WakaTimeTile } from "@/components/tiles/WakaTimeTile";
 import { EducationTile } from "@/components/tiles/EducationTile";
-import { CertificationsTile } from "@/components/tiles/CertificationsTile";
 import { SpotifyTile } from "@/components/tiles/SpotifyTile";
 import { ProjectsTile } from "@/components/tiles/ProjectsTile";
 import { GlobeTile } from "@/components/tiles/GlobeTile";
@@ -30,7 +29,6 @@ export default function HomePage() {
 
           <WakaTimeTile span="xl:col-span-2" />
           <EducationTile span="xl:col-span-2" />
-          <CertificationsTile span="xl:col-span-2" />
 
           <SpotifyTile span="md:col-span-2 xl:col-span-2" />
           <ProjectsTile span="md:col-span-2 xl:col-span-2" />

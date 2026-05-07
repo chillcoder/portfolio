@@ -1,11 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useRef } from "react";
 import Tilt from "react-parallax-tilt";
 import { Tile } from "@/components/ui/Tile";
 import { PROFILE } from "@/config/profile";
-import { track } from "@/lib/track";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 export function HeroTile({ span }: { span?: string }) {
@@ -54,13 +52,6 @@ export function HeroTile({ span }: { span?: string }) {
             {PROFILE.title}. {PROFILE.bio}
           </p>
         </div>
-        <Link
-          href="/tweets"
-          onClick={() => track("tweets_page_link_clicked", { source: "hero" })}
-          className="inline-flex w-fit items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-tile-hover)] px-3 py-1.5 text-xs font-mono uppercase tracking-wider transition hover:bg-[var(--color-fg)] hover:text-[var(--color-bg)]"
-        >
-          See the tweets gallery →
-        </Link>
       </div>
     </Tile>
   );

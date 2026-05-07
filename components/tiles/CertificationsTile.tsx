@@ -1,4 +1,5 @@
 "use client";
+/** Not on the home grid for now; re-enable in `app/page.tsx` (see todo: restore-certifications-tile). */
 
 import { Tile } from "@/components/ui/Tile";
 import { CERTIFICATIONS } from "@/config/profile";

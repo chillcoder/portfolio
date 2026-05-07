@@ -7,7 +7,6 @@ import { SocialIconLinks } from "@/components/SocialIconLinks";
 const FOOTER_LINKS: { label: string; href: string; external?: boolean }[] = [
   { label: "Privacy", href: "/privacy" },
   { label: "Terms", href: "/terms" },
-  { label: "Tweets", href: "/tweets" },
 ];
 
 export function Footer() {
