@@ -22,12 +22,12 @@ const QUERY = /* GraphQL */ `
   query ($login: String!, $yearStart: DateTime!, $now: DateTime!) {
     user(login: $login) {
       contributionsYear: contributionsCollection(from: $yearStart, to: $now) {
-        totalContributions
         totalCommitContributions
         totalPullRequestContributions
         totalIssueContributions
         totalPullRequestReviewContributions
         contributionCalendar {
+          totalContributions
           weeks {
             contributionDays {
               date
@@ -70,7 +70,7 @@ function currentStreak(sortedDays: { contributionCount: number }[]): number {
 export async function GET(req: Request) {
   const distinctId = getDistinctIdFromHeaders(req.headers);
   const login = githubLogin();
-  const token = process.env.GITHUB_TOKEN;
+  const token = process.env.GITHUB_TOKEN?.trim();
 
   if (!token) {
     captureServerEvent(
@@ -78,7 +78,13 @@ export async function GET(req: Request) {
       { reason: "missing_token" },
       distinctId,
     );
-    return NextResponse.json(emptyPayload(login), { status: 200 });
+    return NextResponse.json(emptyPayload(login), {
+      status: 200,
+      headers: {
+        "Cache-Control": "private, no-store, max-age=0",
+        "X-Github-Stats": "missing-token",
+      },
+    });
   }
 
   const { yearStart, now } = yearToDateBounds();
@@ -102,15 +108,16 @@ export async function GET(req: Request) {
     }
 
     const json = (await res.json()) as {
+      errors?: { message: string }[];
       data?: {
         user?: {
           contributionsYear?: {
-            totalContributions?: number;
             totalCommitContributions?: number;
             totalPullRequestContributions?: number;
             totalIssueContributions?: number;
             totalPullRequestReviewContributions?: number;
             contributionCalendar?: {
+              totalContributions?: number;
               weeks?: {
                 contributionDays: { date: string; contributionCount: number }[];
               }[];
@@ -119,6 +126,12 @@ export async function GET(req: Request) {
         };
       };
     };
+
+    if (json.errors?.length) {
+      throw new Error(
+        `GitHub GraphQL: ${json.errors.map((e) => e.message).join("; ")}`,
+      );
+    }
 
     const yearCol = json.data?.user?.contributionsYear;
     const calendar = yearCol?.contributionCalendar;
@@ -134,7 +147,7 @@ export async function GET(req: Request) {
 
     const payload: GithubStatsResponse = {
       contributionsLast7d,
-      contributionsThisYear: yearCol?.totalContributions ?? 0,
+      contributionsThisYear: calendar?.totalContributions ?? 0,
       commitsThisYear: yearCol?.totalCommitContributions ?? 0,
       pullRequestsThisYear: yearCol?.totalPullRequestContributions ?? 0,
       issuesThisYear: yearCol?.totalIssueContributions ?? 0,
@@ -154,6 +167,7 @@ export async function GET(req: Request) {
     return NextResponse.json(payload, {
       headers: {
         "Cache-Control": "private, no-store, max-age=0",
+        "X-Github-Stats": "ok",
       },
     });
   } catch (error) {
@@ -164,7 +178,10 @@ export async function GET(req: Request) {
     );
     return NextResponse.json(emptyPayload(login), {
       status: 200,
-      headers: { "Cache-Control": "private, no-store, max-age=0" },
+      headers: {
+        "Cache-Control": "private, no-store, max-age=0",
+        "X-Github-Stats": "error",
+      },
     });
   }
 }

@@ -27,7 +27,7 @@ function profileUrl(username: string) {
 
 export function GithubTile({ span }: { span?: string }) {
   const { data, isLoading } = useCachedFetch<GithubStats>("/api/github-stats", {
-    cacheKey: "github_stats_v3",
+    cacheKey: "github_stats_v4",
     ttl: 5 * 60 * 1000,
     intervalMs: 5 * 60 * 1000,
   });
