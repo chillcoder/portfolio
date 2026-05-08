@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useLayoutEffect, useEffect, useRef, useState } from "react";
 import Matter from "matter-js";
 import { Tile } from "@/components/ui/Tile";
 import { Badge } from "@/components/ui/Badge";
 import { SKILLS } from "@/config/profile";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { cn } from "@/lib/cn";
 
 type Mode = "physics" | "organized";
 
@@ -36,12 +35,7 @@ export function SkillsTile({ span }: { span?: string }) {
         </button>
       }
     >
-      <div
-        className={cn(
-          "relative mt-4 transition-opacity",
-          mode === "physics" && "h-72",
-        )}
-      >
+      <div className="relative mt-4">
         {mode === "organized" ? (
           <ul className="flex flex-wrap gap-1.5">
             {SKILLS.map((s) => (
@@ -62,14 +56,18 @@ function PhysicsField({ skills }: { skills: readonly string[] }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (reduced) return;
     const el = containerRef.current;
     if (!el) return;
 
-    const width = el.clientWidth;
-    const height = el.clientHeight;
-    if (width === 0 || height === 0) return;
+    let cancelled = false;
+    let teardown: (() => void) | null = null;
+    let ro: ResizeObserver | null = null;
+    let raf = 0;
+
+    const init = (width: number, height: number) => {
+      if (cancelled || width < 32 || height < 32 || teardown) return false;
 
     const Engine = Matter.Engine;
     const Render = Matter.Render;
@@ -137,11 +135,13 @@ function PhysicsField({ skills }: { skills: readonly string[] }) {
     Runner.run(runner, engine);
 
     const ctx = render.context;
-    Matter.Events.on(render, "afterRender", () => {
+    const onAfterRender = () => {
       ctx.save();
       ctx.font =
         '11px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace';
-      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--color-fg");
+      ctx.fillStyle =
+        getComputedStyle(document.documentElement).getPropertyValue("--color-fg").trim() ||
+        "#1a1a1a";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       bodies.forEach((b) => {
@@ -154,22 +154,57 @@ function PhysicsField({ skills }: { skills: readonly string[] }) {
         ctx.restore();
       });
       ctx.restore();
-    });
+    };
+    Matter.Events.on(render, "afterRender", onAfterRender);
+
+      teardown = () => {
+        Matter.Events.off(render, "afterRender", onAfterRender);
+        Render.stop(render);
+        Runner.stop(runner);
+        World.clear(engine.world, false);
+        Engine.clear(engine);
+        render.canvas.remove();
+        render.textures = {};
+      };
+      return true;
+    };
+
+    const runWhenSized = () => {
+      const w = el.clientWidth;
+      const h = el.clientHeight;
+      if (init(w, h)) return;
+      raf = requestAnimationFrame(() => {
+        if (cancelled) return;
+        const w2 = el.clientWidth;
+        const h2 = el.clientHeight;
+        if (init(w2, h2)) return;
+        ro = new ResizeObserver(() => {
+          if (cancelled || teardown) return;
+          const wr = el.clientWidth;
+          const hr = el.clientHeight;
+          if (init(wr, hr) && ro) {
+            ro.disconnect();
+            ro = null;
+          }
+        });
+        ro.observe(el);
+      });
+    };
+
+    runWhenSized();
 
     return () => {
-      Render.stop(render);
-      Runner.stop(runner);
-      World.clear(engine.world, false);
-      Engine.clear(engine);
-      render.canvas.remove();
-      render.textures = {};
+      cancelled = true;
+      if (raf) cancelAnimationFrame(raf);
+      ro?.disconnect();
+      teardown?.();
     };
   }, [skills, reduced]);
 
   return (
     <div
       ref={containerRef}
-      className="relative h-full w-full overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-2)]/50"
+      className="relative h-72 w-full shrink-0 overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-2)]/50"
     />
   );
 }
