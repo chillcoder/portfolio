@@ -5,18 +5,28 @@ import { captureServerEvent, getDistinctIdFromHeaders } from "@/lib/posthogServe
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-interface GithubStatsResponse {
-  commitsLast7d: number;
+export interface GithubStatsResponse {
+  contributionsLast7d: number;
+  contributionsThisYear: number;
   commitsThisYear: number;
+  pullRequestsThisYear: number;
+  issuesThisYear: number;
+  reviewsThisYear: number;
+  currentStreak: number;
+  activeDaysLast30: number;
   daily: { date: string; count: number }[];
   username: string;
 }
 
 const QUERY = /* GraphQL */ `
-  query ($login: String!, $yearStart: DateTime!, $now: DateTime!, $weekStart: DateTime!) {
+  query ($login: String!, $yearStart: DateTime!, $now: DateTime!) {
     user(login: $login) {
       contributionsYear: contributionsCollection(from: $yearStart, to: $now) {
+        totalContributions
         totalCommitContributions
+        totalPullRequestContributions
+        totalIssueContributions
+        totalPullRequestReviewContributions
         contributionCalendar {
           weeks {
             contributionDays {
@@ -26,9 +36,6 @@ const QUERY = /* GraphQL */ `
           }
         }
       }
-      contributionsWeek: contributionsCollection(from: $weekStart, to: $now) {
-        totalCommitContributions
-      }
     }
   }
 `;
@@ -37,20 +44,27 @@ function githubLogin(): string {
   return process.env.GITHUB_LOGIN ?? "chillcoder";
 }
 
-/** UTC bounds: year-to-date calendar + rolling last 7 calendar days (inclusive of today). */
-function contributionWindows(): { yearStart: string; now: string; weekStart: string } {
+function yearToDateBounds(): { yearStart: string; now: string } {
   const now = new Date();
   const y = now.getUTCFullYear();
   const m = now.getUTCMonth();
   const d = now.getUTCDate();
   const yearStart = new Date(Date.UTC(y, 0, 1, 0, 0, 0, 0));
-  const weekStart = new Date(Date.UTC(y, m, d - 6, 0, 0, 0, 0));
   const nowEnd = new Date(Date.UTC(y, m, d, 23, 59, 59, 999));
   return {
     yearStart: yearStart.toISOString(),
     now: nowEnd.toISOString(),
-    weekStart: weekStart.toISOString(),
   };
+}
+
+/** Consecutive days with ≥1 contribution ending on the last calendar day in the list. */
+function currentStreak(sortedDays: { contributionCount: number }[]): number {
+  let streak = 0;
+  for (let i = sortedDays.length - 1; i >= 0; i--) {
+    if (sortedDays[i].contributionCount > 0) streak += 1;
+    else break;
+  }
+  return streak;
 }
 
 export async function GET(req: Request) {
@@ -67,7 +81,7 @@ export async function GET(req: Request) {
     return NextResponse.json(emptyPayload(login), { status: 200 });
   }
 
-  const { yearStart, now, weekStart } = contributionWindows();
+  const { yearStart, now } = yearToDateBounds();
 
   try {
     const res = await fetch("https://api.github.com/graphql", {
@@ -78,7 +92,7 @@ export async function GET(req: Request) {
       },
       body: JSON.stringify({
         query: QUERY,
-        variables: { login, yearStart, now, weekStart },
+        variables: { login, yearStart, now },
       }),
       cache: "no-store",
     });
@@ -91,42 +105,49 @@ export async function GET(req: Request) {
       data?: {
         user?: {
           contributionsYear?: {
+            totalContributions?: number;
             totalCommitContributions?: number;
+            totalPullRequestContributions?: number;
+            totalIssueContributions?: number;
+            totalPullRequestReviewContributions?: number;
             contributionCalendar?: {
               weeks?: {
                 contributionDays: { date: string; contributionCount: number }[];
               }[];
             };
           };
-          contributionsWeek?: {
-            totalCommitContributions?: number;
-          };
         };
       };
     };
 
     const yearCol = json.data?.user?.contributionsYear;
-    const weekCol = json.data?.user?.contributionsWeek;
     const calendar = yearCol?.contributionCalendar;
 
     const days = (calendar?.weeks ?? [])
       .flatMap((w) => w.contributionDays)
       .sort((a, b) => a.date.localeCompare(b.date));
     const last30 = days.slice(-30);
+    const last7 = days.slice(-7);
 
-    const commitsLast7d = weekCol?.totalCommitContributions ?? 0;
-    const commitsThisYear = yearCol?.totalCommitContributions ?? 0;
+    const contributionsLast7d = last7.reduce((s, d) => s + d.contributionCount, 0);
+    const activeDaysLast30 = last30.filter((d) => d.contributionCount > 0).length;
 
     const payload: GithubStatsResponse = {
-      commitsLast7d,
-      commitsThisYear,
+      contributionsLast7d,
+      contributionsThisYear: yearCol?.totalContributions ?? 0,
+      commitsThisYear: yearCol?.totalCommitContributions ?? 0,
+      pullRequestsThisYear: yearCol?.totalPullRequestContributions ?? 0,
+      issuesThisYear: yearCol?.totalIssueContributions ?? 0,
+      reviewsThisYear: yearCol?.totalPullRequestReviewContributions ?? 0,
+      currentStreak: currentStreak(days),
+      activeDaysLast30,
       daily: last30.map((d) => ({ date: d.date, count: d.contributionCount })),
       username: login,
     };
 
     captureServerEvent(
       "github_stats_success",
-      { commits_last_7d: payload.commitsLast7d },
+      { contributions_last_7d: payload.contributionsLast7d },
       distinctId,
     );
 
@@ -150,8 +171,14 @@ export async function GET(req: Request) {
 
 function emptyPayload(login: string): GithubStatsResponse {
   return {
-    commitsLast7d: 0,
+    contributionsLast7d: 0,
+    contributionsThisYear: 0,
     commitsThisYear: 0,
+    pullRequestsThisYear: 0,
+    issuesThisYear: 0,
+    reviewsThisYear: 0,
+    currentStreak: 0,
+    activeDaysLast30: 0,
     daily: [],
     username: login,
   };
