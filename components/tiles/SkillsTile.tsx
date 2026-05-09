@@ -111,8 +111,9 @@ function PhysicsField({ skills }: { skills: readonly string[] }) {
       });
 
       const t = 40;
+      // Bottom + sides only. A thick top slab made bodies stick on its upper surface (y ≈ -40)
+      // instead of falling through into the visible area (they never reached y > 0).
       const walls = [
-        Bodies.rectangle(width / 2, -t / 2, width + t * 2, t, { isStatic: true }),
         Bodies.rectangle(width / 2, height + t / 2, width + t * 2, t, { isStatic: true }),
         Bodies.rectangle(-t / 2, height / 2, t, height + t * 2, { isStatic: true }),
         Bodies.rectangle(width + t / 2, height / 2, t, height + t * 2, { isStatic: true }),
@@ -123,8 +124,9 @@ function PhysicsField({ skills }: { skills: readonly string[] }) {
         const h = 28;
         const x = 40 + Math.random() * Math.max(20, width - 80);
         const y = -120 - i * 36;
+        const r = Math.min(12, w / 2 - 1, h / 2 - 1);
         const body = Bodies.rectangle(x, y, w, h, {
-          chamfer: { radius: 14 },
+          chamfer: { radius: Math.max(2, r) },
           restitution: 0.35,
           friction: 0.4,
         });
