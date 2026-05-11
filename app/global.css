@@ -103,6 +103,10 @@
     animation: marquee 28s linear infinite;
   }
 
+  .marquee-track-travel {
+    animation: marquee 42s linear infinite;
+  }
+
   @keyframes marquee {
     from {
       transform: translateX(0);
@@ -122,8 +126,32 @@
     }
   }
 
+  @keyframes ufo-sweep {
+    0% {
+      left: -12%;
+    }
+    50% {
+      left: 88%;
+    }
+    100% {
+      left: -12%;
+    }
+  }
+
+  .globe-ufo-fly {
+    animation: ufo-sweep 2.6s ease-in-out infinite;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .marquee-track {
+      animation: none;
+    }
+
+    .marquee-track-travel {
+      animation: none;
+    }
+
+    .globe-ufo-fly {
       animation: none;
     }
 
