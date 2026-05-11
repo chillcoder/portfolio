@@ -104,7 +104,7 @@
   }
 
   .marquee-track-travel {
-    animation: marquee 42s linear infinite;
+    animation: marquee 21s linear infinite;
   }
 
   @keyframes marquee {

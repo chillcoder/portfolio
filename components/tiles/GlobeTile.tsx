@@ -35,6 +35,9 @@ const GLOBE_IMAGE =
   "https://unpkg.com/three-globe/example/img/earth-night.jpg";
 const BUMP_IMAGE = "https://unpkg.com/three-globe/example/img/earth-topology.png";
 
+/** Camera altitude (globe-relative); lower = closer. */
+const DEFAULT_POV_ALTITUDE = 1.42;
+
 type ArcMode = "hub" | "trip";
 
 type GlobePoint = {
@@ -90,15 +93,25 @@ export function GlobeTile({ span }: { span?: string }) {
     return () => ro.disconnect();
   }, []);
 
-  useEffect(() => {
+  const syncGlobeControls = useCallback(() => {
     const g = globeRef.current;
     if (!g) return;
     const controls = g.controls();
+    const r = g.getGlobeRadius();
     controls.autoRotate = !reduced && !interacted;
     controls.autoRotateSpeed = 0.4;
-    controls.enableZoom = false;
-    g.pointOfView({ lat: HOME.lat, lng: HOME.lng, altitude: 2.2 }, 1200);
-  }, [reduced, interacted, size]);
+    controls.enableZoom = true;
+    controls.zoomSpeed = 0.65;
+    controls.enablePan = false;
+    controls.minDistance = r * 1.28;
+    controls.maxDistance = r * 22;
+    g.pointOfView({ lat: HOME.lat, lng: HOME.lng, altitude: DEFAULT_POV_ALTITUDE }, 900);
+  }, [reduced, interacted]);
+
+  useEffect(() => {
+    if (size.w <= 0) return;
+    syncGlobeControls();
+  }, [size, syncGlobeControls]);
 
   const arcs = useMemo(
     () => (arcMode === "hub" ? hubArcsFromHome() : tripRouteArcs()),
@@ -235,17 +248,23 @@ export function GlobeTile({ span }: { span?: string }) {
             </button>
           </div>
           <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--color-fg-muted)]">
-            drag to spin
+            drag · scroll to zoom
           </span>
         </div>
       }
     >
-      <div className="mt-4 flex items-end justify-between gap-3">
+      <div className="mt-4 grid grid-cols-3 gap-3 items-end">
         <StatTile value={visitedCityCount()} label="cities" />
         <StatTile value={uniqueCountries()} label="countries" />
-        <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--color-fg-muted)]">
-          home · {HOME.name}
-        </span>
+        <div className="flex flex-col items-end gap-1">
+          <span className="font-mono text-3xl tabular-nums leading-none text-[var(--color-fg)] md:text-4xl">
+            SF
+          </span>
+          <span className="text-right text-xs uppercase tracking-wider text-[var(--color-fg-muted)]">
+            home base
+          </span>
+          <span className="sr-only">{HOME.name}</span>
+        </div>
       </div>
       <div
         ref={containerRef}
@@ -265,6 +284,7 @@ export function GlobeTile({ span }: { span?: string }) {
         {size.w > 0 && (
           <Globe
             ref={globeRef}
+            onGlobeReady={syncGlobeControls}
             width={size.w}
             height={size.h}
             backgroundColor="rgba(0,0,0,0)"
@@ -303,13 +323,14 @@ export function GlobeTile({ span }: { span?: string }) {
           />
         )}
       </div>
-      <div className="mt-4 border-t border-[var(--color-border)] pt-4">
-        <div className="flex justify-center">
-          <StatTile
-            value={`~${totalMiles.toLocaleString()}`}
-            label="approx. miles (great circle)"
-            hint="Includes return to SF per trip + round trips for repeat hubs"
-          />
+      <div className="mt-4 border-t border-[var(--color-border)] pt-3">
+        <div className="flex flex-col items-center gap-0.5">
+          <span className="font-mono text-xl tabular-nums leading-none text-[var(--color-fg)] md:text-2xl">
+            ~{totalMiles.toLocaleString()}
+          </span>
+          <span className="text-[9px] uppercase tracking-[0.14em] text-[var(--color-fg-muted)]">
+            approx. mi
+          </span>
         </div>
         <div className="relative mt-3 overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-2)]/35">
           <div className="marquee-track-travel flex gap-14 whitespace-nowrap px-1 py-2 font-mono text-[10px] leading-snug tracking-wide text-[var(--color-fg-muted)]">

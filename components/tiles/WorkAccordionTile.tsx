@@ -1,94 +1,80 @@
 "use client";
 
-import { useRef, useState } from "react";
-import gsap from "gsap";
+import { useState } from "react";
 import { Tile } from "@/components/ui/Tile";
-import { WORK } from "@/config/profile";
-import { Badge } from "@/components/ui/Badge";
+import { WORK, type WorkRole } from "@/config/profile";
 import { track } from "@/lib/track";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { cn } from "@/lib/cn";
+
+const DOT_CLASS = [
+  "bg-[var(--color-accent-primary)]",
+  "bg-[var(--color-accent-tertiary)]",
+  "bg-[var(--color-accent-secondary)]",
+] as const;
+
+function spotlightLine(role: WorkRole): string {
+  return role.spotlight ?? role.bullets[0] ?? role.summary;
+}
+
+function tenure(role: WorkRole): string {
+  return `${role.start} – ${role.end}`;
+}
 
 export function WorkAccordionTile({ span }: { span?: string }) {
-  const [open, setOpen] = useState<number | null>(0);
-  const reduced = useReducedMotion();
-  const panelRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const [open, setOpen] = useState<number | null>(null);
 
   function toggle(i: number) {
     const next = open === i ? null : i;
     if (next !== null) {
       track("work_accordion_expand", { company: WORK[i].company });
     }
-
-    if (!reduced) {
-      const closing = panelRefs.current[open ?? -1];
-      const opening = panelRefs.current[next ?? -1];
-      if (closing && open !== null) {
-        gsap.to(closing, {
-          height: 0,
-          opacity: 0,
-          duration: 0.25,
-          ease: "power2.inOut",
-        });
-      }
-      if (opening && next !== null) {
-        gsap.fromTo(
-          opening,
-          { height: 0, opacity: 0 },
-          {
-            height: "auto",
-            opacity: 1,
-            duration: 0.35,
-            ease: "power3.out",
-          },
-        );
-      }
-    }
     setOpen(next);
   }
 
   return (
-    <Tile span={span} eyebrow="Work" title="Recent roles" accent="primary">
+    <Tile
+      span={span}
+      eyebrow="Work"
+      title="Recent roles"
+      accent="primary"
+      className="flex h-full min-h-0 flex-col"
+    >
       <ul className="mt-4 flex flex-col divide-y divide-[var(--color-border)]">
         {WORK.map((role, i) => {
           const isOpen = open === i;
+          const dot = DOT_CLASS[i % DOT_CLASS.length];
           return (
-            <li key={role.company} className="py-3 first:pt-0 last:pb-0">
+            <li key={`${role.company}-${role.role}-${role.start}`} className="py-2.5 first:pt-0 last:pb-0">
               <button
                 type="button"
                 aria-expanded={isOpen}
                 aria-controls={`work-panel-${i}`}
                 onClick={() => toggle(i)}
-                className="flex w-full items-baseline justify-between gap-3 text-left"
+                className="flex w-full gap-2.5 text-left"
               >
-                <span className="flex flex-col gap-0.5">
-                  <span className="text-sm font-medium text-[var(--color-fg)]">{role.company}</span>
-                  <span className="text-xs text-[var(--color-fg-muted)]">{role.role}</span>
-                </span>
-                <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--color-fg-muted)]">
-                  {role.start} → {role.end}
+                <span
+                  className={cn("mt-1.5 size-2 shrink-0 rounded-full", dot)}
+                  aria-hidden
+                />
+                <span className="min-w-0 flex-1 leading-snug">
+                  <span className="font-medium text-[var(--color-fg)]">{role.role}</span>
+                  <span className="text-[var(--color-fg-muted)]">
+                    {" "}
+                    | {role.company} · [{tenure(role)}]
+                  </span>
                 </span>
               </button>
               <div
                 id={`work-panel-${i}`}
-                ref={(el) => {
-                  panelRefs.current[i] = el;
-                }}
-                role="region"
-                aria-label={`Details for ${role.company}`}
-                className="overflow-hidden"
-                style={isOpen && reduced ? { height: "auto", opacity: 1 } : undefined}
-                hidden={!isOpen && reduced}
+                className={cn(
+                  "grid transition-[grid-template-rows] duration-300 ease-out motion-reduce:duration-0",
+                  isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
+                )}
               >
-                <div className="pt-3 text-sm text-[var(--color-fg-muted)]">
-                  <p className="mb-2">{role.summary}</p>
-                  <ul className="ml-4 list-disc space-y-1">
-                    {role.bullets.map((b) => (
-                      <li key={b}>{b}</li>
-                    ))}
-                  </ul>
-                  <div className="mt-3 flex flex-wrap gap-1.5">
-                    <Badge variant="outline">{role.role}</Badge>
-                  </div>
+                <div className="min-h-0 overflow-hidden">
+                  <p className="border-l-2 border-[var(--color-border)] pl-3 pt-2 text-sm leading-relaxed text-[var(--color-fg-muted)]">
+                    {spotlightLine(role)}
+                  </p>
                 </div>
               </div>
             </li>

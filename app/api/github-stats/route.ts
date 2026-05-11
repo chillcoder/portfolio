@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { sumContributionsTrailingNDays } from "@/lib/githubContributions";
 import { captureServerEvent, getDistinctIdFromHeaders } from "@/lib/posthogServer";
 
 /** Avoid CDN / static caching so the tile stays fresh. */
@@ -140,9 +141,7 @@ export async function GET(req: Request) {
       .flatMap((w) => w.contributionDays)
       .sort((a, b) => a.date.localeCompare(b.date));
     const last30 = days.slice(-30);
-    const last7 = days.slice(-7);
-
-    const contributionsLast7d = last7.reduce((s, d) => s + d.contributionCount, 0);
+    const contributionsLast7d = sumContributionsTrailingNDays(days, 7);
     const activeDaysLast30 = last30.filter((d) => d.contributionCount > 0).length;
 
     const payload: GithubStatsResponse = {

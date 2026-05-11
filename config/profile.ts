@@ -26,7 +26,7 @@ export const ABOUT_FACTS: { label: string; value: string }[] = [
   {
     label: "Currently",
     value:
-      "CS AI Developer (AI Guild) + Senior CSM at Juniper Square—B2B investment management software",
+      "Applied AI (AI Guild) + Senior CSM at Juniper Square—B2B investment management software",
   },
   {
     label: "Impact",
@@ -54,16 +54,20 @@ export interface WorkRole {
   end: string | "Present";
   summary: string;
   bullets: string[];
+  /** Single highlight shown when a role is expanded (candidate-facing). */
+  spotlight?: string;
 }
 
 export const WORK: WorkRole[] = [
   {
     company: "Juniper Square",
-    role: "CS AI Developer, AI Guild (concurrent with Senior CSM)",
+    role: "Applied AI, AI Guild (concurrent with Senior CSM)",
     start: "Mar 2026",
     end: "Present",
     summary:
       "Production internal applications with Claude Code—discovery through delivery for CS and GTM.",
+    spotlight:
+      "Ship internal apps with Claude Code from discovery through delivery—tooling that contextualizes customer data, speeds CS responses, and automates account health scoring.",
     bullets: [
       "Ship tooling that contextualizes customer data, speeds responses, surfaces product knowledge, and automates account health scoring—less manual CSM work, better coverage.",
       "Partner with CS and GTM to turn business cases into fully built internal apps.",
@@ -75,6 +79,8 @@ export const WORK: WorkRole[] = [
     start: "Nov 2024",
     end: "Present",
     summary: "Enterprise and mid-market adoption across a large book of business.",
+    spotlight:
+      "115% net retention across 70+ accounts (~$6.3M ARR) with technical enablement, expansion, and scaled digital engagement.",
     bullets: [
       "Drive adoption across 70+ accounts (~$6.3M ARR); 115% net retention via technical enablement, expansion, and scaled digital engagement.",
       "$1.7M expansion ARR in 2025 from usage data, health scoring, and timely expansion plays.",
@@ -88,6 +94,8 @@ export const WORK: WorkRole[] = [
     start: "Aug 2022",
     end: "2024",
     summary: "Onboarding, adoption playbooks, and early AI product guidance.",
+    spotlight:
+      "Scaled onboarding and adoption playbooks across CX; led early AI product adoption with technical enablement and stakeholder alignment.",
     bullets: [
       "Structured onboarding and repeatable adoption processes that scaled across CX.",
       "Led early AI product adoption with value articulation, technical enablement, and stakeholder alignment.",
@@ -99,6 +107,8 @@ export const WORK: WorkRole[] = [
     start: "Apr 2022",
     end: "Aug 2022",
     summary: "Data model SME and reporting at scale.",
+    spotlight:
+      "Partnered with Product to streamline quarterly reporting across ~$250B in equity—~40% faster delivery via analytics and process redesign.",
     bullets: [
       "Go-to for Support, CSM, and Technical Consulting on data integrations and connectivity.",
       "With Product, streamlined quarterly reporting across ~$250B equity—~40% faster delivery via analytics and process redesign.",
@@ -110,6 +120,8 @@ export const WORK: WorkRole[] = [
     start: "Jan 2020",
     end: "Mar 2021",
     summary: "New business and technical discovery for developer-focused SaaS.",
+    spotlight:
+      "~$4.5M pipeline to ~$1.2M new ARR through technical discovery; built Python/SQL tooling for pipeline and reporting.",
     bullets: [
       "Beat quota; ~$4.5M pipeline converting to ~$1.2M new ARR through technical discovery and developer audience enablement.",
       "Built internal Python/SQL tooling for pipeline tracking and reporting.",
@@ -121,6 +133,8 @@ export const WORK: WorkRole[] = [
     start: "Aug 2019",
     end: "Jan 2020",
     summary: "Technical demos and enterprise discovery.",
+    spotlight:
+      "Enterprise technical demos and discovery; consistently above 120% of quota.",
     bullets: ["Technical product demos and discovery with enterprise teams; 120%+ quota."],
   },
 ];
