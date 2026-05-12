@@ -37,8 +37,8 @@ export function HeroTile({ span }: { span?: string }) {
   ));
 
   const inner = (
-    <Tile span={span} accent="primary" padded={false} className="min-h-[240px]">
-      <div className="flex h-full flex-col justify-between gap-6 p-6 md:p-8">
+    <Tile span={span} accent="primary" padded={false} className="min-h-[200px] md:min-h-[220px]">
+      <div className="flex h-full flex-col justify-start gap-5 p-6 md:p-8">
         <div className="flex flex-col gap-3">
           <span className="font-mono text-xs uppercase tracking-[0.2em] text-[var(--color-accent-primary)]">
             {PROFILE.location}

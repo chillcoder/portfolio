@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     template: "%s · Lucas O'Brien",
   },
   description:
-    "Lucas O'Brien — enterprise customer success and AI Guild builder at Juniper Square; CS, GTM tooling, and travel.",
+    "Lucas O'Brien — enterprise customer success and applied AI at Juniper Square; CS, GTM tooling, and travel.",
   openGraph: {
     type: "website",
     title: "Lucas O'Brien",

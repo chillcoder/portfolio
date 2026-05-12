@@ -6,13 +6,13 @@
 export const PROFILE = {
   name: "Lucas O'Brien",
   shortName: "Lucas",
-  title: "Customer Success & AI implementation",
+  title: "Customer Success & Applied AI",
   location: "San Francisco, CA",
   homeCoords: { lat: 37.7749, lng: -122.4194 },
   domain: "lucas-obrien.com",
   email: "lucasobrien123@gmail.com",
   careerStart: new Date("2019-08-01"),
-  bio: "I bridge technical AI implementation with revenue and retention—enterprise CS at Juniper Square, with a concurrent AI Guild role shipping internal tools in Claude Code. I translate business cases into shipped apps that help CS and GTM scale.",
+  bio: "Senior CSM at Juniper Square, with a concurrent applied-AI role shipping internal tools in Claude Code. I connect revenue and retention goals to shipped apps for CS and GTM.",
   socials: {
     github: "https://github.com/chillcoder",
     twitter: "https://x.com/lucas_obrien",
@@ -26,7 +26,7 @@ export const ABOUT_FACTS: { label: string; value: string }[] = [
   {
     label: "Currently",
     value:
-      "Applied AI (AI Guild) + Senior CSM at Juniper Square—B2B investment management software",
+      "Applied AI at Juniper Square (concurrent with Senior CSM)—B2B investment management software",
   },
   {
     label: "Impact",
@@ -61,7 +61,7 @@ export interface WorkRole {
 export const WORK: WorkRole[] = [
   {
     company: "Juniper Square",
-    role: "Applied AI, AI Guild (concurrent with Senior CSM)",
+    role: "Applied AI at Juniper Square (concurrent with Senior CSM)",
     start: "Mar 2026",
     end: "Present",
     summary:
@@ -205,12 +205,26 @@ export const PROJECTS: Project[] = [
     tags: ["next.js", "tailwind", "posthog"],
   },
   {
-    name: "AI Guild internal tooling",
+    name: "Scout VC",
+    description: "Seed-stage due diligence AI tool.",
+    href: "https://www.scoutvc.ai/",
+    status: "live",
+    tags: ["ai", "due diligence", "seed"],
+  },
+  {
+    name: "Applied AI internal tooling",
     description:
       "Production internal apps at Juniper Square—Claude Code, CS/GTM workflows, health and knowledge automation.",
     href: "https://www.linkedin.com/in/lucas-obrien",
     status: "wip",
     tags: ["claude code", "internal tools", "cs"],
+  },
+  {
+    name: "PromptOps",
+    description: "AI model eval tool.",
+    href: "https://github.com/chillcoder",
+    status: "archived",
+    tags: ["ai", "eval"],
   },
   {
     name: "Pipeline & reporting utilities",

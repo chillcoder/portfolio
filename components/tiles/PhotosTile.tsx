@@ -24,7 +24,7 @@ export function PhotosTile({ span }: { span?: string }) {
   const [open, setOpen] = useState(false);
   const [index, setIndex] = useState(0);
   const { data, isLoading } = useCachedFetch<PhotosResponse>("/api/photos", {
-    cacheKey: "photos_tile",
+    cacheKey: "photos_tile_v2",
     ttl: 60 * 60 * 1000,
   });
 
@@ -92,7 +92,23 @@ export function PhotosTile({ span }: { span?: string }) {
           </div>
         ) : (
           <p className="text-sm text-[var(--color-fg-muted)]">
-            Upload photos to Cloudinary folder `portfolio/photos` to populate this tile.
+            Add images in Cloudinary. By default the tile lists public IDs under{" "}
+            <code className="rounded bg-[var(--color-bg-2)] px-1 font-mono text-xs">
+              portfolio/photos
+            </code>
+            . For root uploads (e.g.{" "}
+            <code className="rounded bg-[var(--color-bg-2)] px-1 font-mono text-xs">
+              Morro-20_f3ayys
+            </code>
+            ), set{" "}
+            <code className="rounded bg-[var(--color-bg-2)] px-1 font-mono text-xs">
+              CLOUDINARY_PHOTOS_PREFIX=
+            </code>{" "}
+            (empty) in{" "}
+            <code className="rounded bg-[var(--color-bg-2)] px-1 font-mono text-xs">
+              .env.local
+            </code>
+            .
           </p>
         )}
       </div>
