@@ -138,6 +138,14 @@ function PhysicsField({ skills }: { skills: readonly string[] }) {
       World.add(engine.world, bodies);
 
       const mouse = Mouse.create(canvas);
+      // matter-js v0.20 reads `data-pixel-ratio` via parseInt which truncates
+      // fractional DPRs (1.5, 1.75 etc.) and makes mouse coordinates miss the
+      // bodies. Reassign explicitly to the real dpr, and reset scale/offset in
+      // case stale state survived a Strict Mode double-invoke.
+      mouse.pixelRatio = dpr;
+      Mouse.setScale(mouse, { x: 1, y: 1 });
+      Mouse.setOffset(mouse, { x: 0, y: 0 });
+
       const mouseConstraint = MouseConstraint.create(engine, {
         mouse,
         constraint: { stiffness: 0.2, render: { visible: false } },
@@ -258,7 +266,7 @@ function PhysicsField({ skills }: { skills: readonly string[] }) {
     >
       <canvas
         ref={canvasRef}
-        className="absolute inset-0 block size-full max-h-none max-w-none touch-none"
+        className="pointer-events-auto absolute inset-0 block size-full max-h-none max-w-none cursor-grab touch-none select-none active:cursor-grabbing"
         aria-hidden
       />
     </div>
