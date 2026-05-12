@@ -56,11 +56,29 @@ export function WorkAccordionTile({ span }: { span?: string }) {
                   className={cn("mt-1.5 size-2 shrink-0 rounded-full", dot)}
                   aria-hidden
                 />
-                <span className="min-w-0 flex-1 leading-snug">
+                <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1 leading-snug">
                   <span className="font-medium text-[var(--color-fg)]">{role.role}</span>
-                  <span className="text-[var(--color-fg-muted)]">
-                    {" "}
-                    | {role.company} · [{tenure(role)}]
+                  <span
+                    className="inline-flex items-center rounded-md px-1.5 py-0.5 text-[11px] font-medium"
+                    style={{
+                      background:
+                        "color-mix(in oklab, var(--color-accent-secondary) 14%, transparent)",
+                      color:
+                        "color-mix(in oklab, var(--color-accent-secondary) 65%, var(--color-fg))",
+                    }}
+                  >
+                    {role.company}
+                  </span>
+                  <span
+                    className="inline-flex items-center rounded-md px-1.5 py-0.5 font-mono text-[10px] tracking-wide"
+                    style={{
+                      background:
+                        "color-mix(in oklab, var(--color-accent-tertiary) 14%, transparent)",
+                      color:
+                        "color-mix(in oklab, var(--color-accent-tertiary) 65%, var(--color-fg))",
+                    }}
+                  >
+                    {tenure(role)}
                   </span>
                 </span>
               </button>

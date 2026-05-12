@@ -61,7 +61,7 @@ export interface WorkRole {
 export const WORK: WorkRole[] = [
   {
     company: "Juniper Square",
-    role: "Applied AI at Juniper Square (concurrent with Senior CSM)",
+    role: "Applied AI",
     start: "Mar 2026",
     end: "Present",
     summary:
