@@ -73,14 +73,15 @@ const TILES: TileEntry[] = [
   { id: "about", Component: AboutTile, cols: 3, rows: 2 },
   { id: "spotify", Component: SpotifyTile, cols: 3, rows: 2 },
 
-  // Band 4 — credentials (3 + 3 = 6)
-  { id: "wakatime", Component: WakaTimeTile, cols: 3 },
-  { id: "education", Component: EducationTile, cols: 3 },
+  // Band 4 — projects + stacked stats (4 + 2 = 6 per row, two rows tall)
+  // Projects becomes a tall scannable column; WakaTime and Education stack
+  // beside it as compact 2-col cards. Order matters here: Projects first so
+  // it claims the 4-col block; the two stat tiles backfill the right column.
+  { id: "projects", Component: ProjectsTile, cols: 4, rows: 2 },
+  { id: "wakatime", Component: WakaTimeTile, cols: 2 },
+  { id: "education", Component: EducationTile, cols: 2 },
 
-  // Band 5 — projects (6 = 6)
-  { id: "projects", Component: ProjectsTile, cols: 6 },
-
-  // Band 6 — closing (3 + 3 = 6, both tall)
+  // Band 5 — closing (3 + 3 = 6, both tall)
   { id: "globe", Component: GlobeTile, cols: 3, rows: 2 },
   { id: "photos", Component: PhotosTile, cols: 3, rows: 2 },
 ];
