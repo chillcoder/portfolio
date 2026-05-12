@@ -49,6 +49,20 @@ describe("laneDefense sim", () => {
     expect(s.lives).toBeLessThan(livesBefore);
   });
 
+  it("removes a random tower on leak when towers exist", () => {
+    const s = createInitialState();
+    restartRun(s);
+    expect(tryPlaceTower(s, 0, "automate")).toBe(true);
+    expect(tryPlaceTower(s, 1, "enable")).toBe(true);
+    startNextWave(s);
+    s.spawnRemaining = 0;
+    s.enemies = [{ id: 2, t: 0.99, hp: 999, maxHp: 999, speed: 10, kind: "low_adoption" }];
+    const towerCountBefore = Object.keys(s.towers).length;
+    tick(s, 0.5);
+    expect(s.lives).toBeLessThan(LANE_DEFENSE_ECONOMY.startingLives);
+    expect(Object.keys(s.towers).length).toBeLessThan(towerCountBefore);
+  });
+
   it("sets lost when lives reach zero", () => {
     const s = createInitialState();
     restartRun(s);

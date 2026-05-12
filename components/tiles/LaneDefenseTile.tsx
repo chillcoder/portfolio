@@ -392,6 +392,7 @@ export function LaneDefenseTile({ span }: { span?: string }) {
               "Built in Cursor between QBRs."
             : "Defend the account. Ten quarters to renewal."}
           </span>
+          <span className="mt-1 block text-[10px] font-mono text-[var(--color-fg-muted)]/85">WIP</span>
         </span>
       }
       action={collapseToggle}
@@ -407,7 +408,7 @@ export function LaneDefenseTile({ span }: { span?: string }) {
 
         {(!expanded || userPaused) && (
           <p className="text-[11px] leading-snug text-[var(--color-fg-muted)]">
-            Yes, this is a real portfolio. Yes, I built a game about my job. Builder identity confirmed.
+            10 quarter side quest
           </p>
         )}
 

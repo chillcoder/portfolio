@@ -28,8 +28,8 @@ export const LANE_DEFENSE_TOWER_TYPES: readonly TowerTypeDef[] = [
     tooltip: "Compounding workflows. Cheap, fast, relentless.",
     cost: 55,
     range: 0.22,
-    fireIntervalSec: 0.11,
-    damagePerShot: 3.8,
+    fireIntervalSec: 0.13,
+    damagePerShot: 3.2,
     hitsAllInRange: false,
     slowFactor: 1,
   },
@@ -39,8 +39,8 @@ export const LANE_DEFENSE_TOWER_TYPES: readonly TowerTypeDef[] = [
     tooltip: "Trains the customer to self-serve. High range, steady damage.",
     cost: 70,
     range: 0.5,
-    fireIntervalSec: 0.26,
-    damagePerShot: 12,
+    fireIntervalSec: 0.3,
+    damagePerShot: 10,
     hitsAllInRange: false,
     slowFactor: 0.72,
   },
@@ -50,8 +50,8 @@ export const LANE_DEFENSE_TOWER_TYPES: readonly TowerTypeDef[] = [
     tooltip: "Surfaces churn signals before they escalate. Wide coverage, slow to fire.",
     cost: 85,
     range: 0.52,
-    fireIntervalSec: 0.52,
-    damagePerShot: 7,
+    fireIntervalSec: 0.58,
+    damagePerShot: 5.5,
     hitsAllInRange: true,
     slowFactor: 1,
   },
@@ -61,8 +61,8 @@ export const LANE_DEFENSE_TOWER_TYPES: readonly TowerTypeDef[] = [
     tooltip: "Executive sponsor outreach. Expensive but decisive.",
     cost: 120,
     range: 0.36,
-    fireIntervalSec: 0.88,
-    damagePerShot: 78,
+    fireIntervalSec: 0.95,
+    damagePerShot: 62,
     hitsAllInRange: false,
     slowFactor: 1,
   },
@@ -85,17 +85,27 @@ export const ENEMY_KIND_LABEL: Record<EnemyKind, string> = {
   renewal_at_risk: "Renewal at risk",
 };
 
+/** Tiny abbrev for canvas (mono, very small). */
+export const ENEMY_KIND_ABBR: Record<EnemyKind, string> = {
+  stalled_poc: "POC",
+  low_adoption: "LOW",
+  budget_freeze: "FRZ",
+  exec_turnover: "EXE",
+  competitive_bakeoff: "BKF",
+  renewal_at_risk: "RNW",
+};
+
 /** Multipliers applied to the wave's base HP and speed. */
 export const ENEMY_KIND_STATS: Record<
   EnemyKind,
   { hpMul: number; speedMul: number }
 > = {
-  stalled_poc: { hpMul: 0.52, speedMul: 1.28 },
-  low_adoption: { hpMul: 1, speedMul: 1 },
-  budget_freeze: { hpMul: 1.75, speedMul: 0.62 },
-  exec_turnover: { hpMul: 0.95, speedMul: 1.32 },
-  competitive_bakeoff: { hpMul: 2.85, speedMul: 0.82 },
-  renewal_at_risk: { hpMul: 3.6, speedMul: 0.72 },
+  stalled_poc: { hpMul: 0.55, speedMul: 1.34 },
+  low_adoption: { hpMul: 1.08, speedMul: 1.06 },
+  budget_freeze: { hpMul: 1.88, speedMul: 0.66 },
+  exec_turnover: { hpMul: 1, speedMul: 1.38 },
+  competitive_bakeoff: { hpMul: 3.05, speedMul: 0.88 },
+  renewal_at_risk: { hpMul: 3.85, speedMul: 0.78 },
 };
 
 export interface WaveDef {
@@ -108,22 +118,22 @@ export interface WaveDef {
 
 /** Ten quarters; per-spawn kind chosen in sim from wave index + spawn index. */
 export const LANE_DEFENSE_WAVES: readonly WaveDef[] = [
-  { enemyCount: 8, spawnIntervalSec: 1.1, enemyHp: 28, enemySpeed: 0.055 },
-  { enemyCount: 10, spawnIntervalSec: 1.0, enemyHp: 34, enemySpeed: 0.057 },
-  { enemyCount: 11, spawnIntervalSec: 0.95, enemyHp: 40, enemySpeed: 0.059 },
-  { enemyCount: 12, spawnIntervalSec: 0.9, enemyHp: 48, enemySpeed: 0.061 },
-  { enemyCount: 13, spawnIntervalSec: 0.85, enemyHp: 56, enemySpeed: 0.063 },
-  { enemyCount: 14, spawnIntervalSec: 0.82, enemyHp: 64, enemySpeed: 0.065 },
-  { enemyCount: 15, spawnIntervalSec: 0.78, enemyHp: 74, enemySpeed: 0.067 },
-  { enemyCount: 16, spawnIntervalSec: 0.75, enemyHp: 86, enemySpeed: 0.069 },
-  { enemyCount: 17, spawnIntervalSec: 0.72, enemyHp: 98, enemySpeed: 0.071 },
-  { enemyCount: 18, spawnIntervalSec: 0.68, enemyHp: 112, enemySpeed: 0.073 },
+  { enemyCount: 9, spawnIntervalSec: 1.05, enemyHp: 38, enemySpeed: 0.06 },
+  { enemyCount: 11, spawnIntervalSec: 0.96, enemyHp: 46, enemySpeed: 0.062 },
+  { enemyCount: 12, spawnIntervalSec: 0.9, enemyHp: 54, enemySpeed: 0.064 },
+  { enemyCount: 13, spawnIntervalSec: 0.86, enemyHp: 64, enemySpeed: 0.066 },
+  { enemyCount: 14, spawnIntervalSec: 0.82, enemyHp: 74, enemySpeed: 0.068 },
+  { enemyCount: 15, spawnIntervalSec: 0.78, enemyHp: 84, enemySpeed: 0.07 },
+  { enemyCount: 16, spawnIntervalSec: 0.75, enemyHp: 96, enemySpeed: 0.072 },
+  { enemyCount: 17, spawnIntervalSec: 0.72, enemyHp: 108, enemySpeed: 0.074 },
+  { enemyCount: 18, spawnIntervalSec: 0.69, enemyHp: 122, enemySpeed: 0.076 },
+  { enemyCount: 19, spawnIntervalSec: 0.65, enemyHp: 138, enemySpeed: 0.078 },
 ];
 
 export const LANE_DEFENSE_ECONOMY = {
-  startingGold: 210,
+  startingGold: 125,
   startingLives: 10,
-  goldPerKill: 12,
+  goldPerKill: 8,
 } as const;
 
 export const QUARTER_NAMES: readonly string[] = [
@@ -141,7 +151,6 @@ export const QUARTER_NAMES: readonly string[] = [
 
 /** Pick enemy archetype for a spawn (0-based wave index, spawn index, total in wave). */
 export function pickEnemyKind(waveIndex: number, spawnIndex: number, totalInWave: number): EnemyKind {
-  const q = waveIndex + 1;
   const isLast = spawnIndex === totalInWave - 1;
   const isFirst = spawnIndex === 0;
 

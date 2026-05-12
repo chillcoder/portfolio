@@ -1,4 +1,9 @@
-import { ENEMY_KIND_LABEL, LANE_DEFENSE_PAD_T, type TowerTypeId } from "@/config/laneDefense";
+import {
+  ENEMY_KIND_ABBR,
+  LANE_DEFENSE_PAD_T,
+  type EnemyKind,
+  type TowerTypeId,
+} from "@/config/laneDefense";
 import { towerTypeDef, type GameState } from "@/lib/laneDefense/sim";
 
 export interface LaneRenderTheme {
@@ -97,6 +102,82 @@ function drawTowerGlyph(
   ctx.restore();
 }
 
+function drawEnemyGlyph(
+  ctx: CanvasRenderingContext2D,
+  cx: number,
+  cy: number,
+  s: number,
+  kind: EnemyKind,
+  ink: string,
+): void {
+  ctx.save();
+  ctx.strokeStyle = ink;
+  ctx.fillStyle = ink;
+  ctx.lineWidth = Math.max(0.85, s * 0.14);
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+
+  switch (kind) {
+    case "stalled_poc": {
+      ctx.beginPath();
+      ctx.moveTo(cx - s * 0.45, cy);
+      ctx.lineTo(cx + s * 0.55, cy);
+      ctx.lineTo(cx + s * 0.15, cy - s * 0.38);
+      ctx.moveTo(cx + s * 0.55, cy);
+      ctx.lineTo(cx + s * 0.15, cy + s * 0.38);
+      ctx.stroke();
+      break;
+    }
+    case "low_adoption": {
+      for (let i = -1; i <= 1; i++) {
+        const h = s * (0.2 + 0.2 * (i + 1));
+        ctx.beginPath();
+        ctx.moveTo(cx + i * s * 0.32, cy + s * 0.35);
+        ctx.lineTo(cx + i * s * 0.32, cy + s * 0.35 - h);
+        ctx.stroke();
+      }
+      break;
+    }
+    case "budget_freeze": {
+      for (let i = 0; i < 3; i++) {
+        const a = (i * Math.PI) / 3;
+        ctx.beginPath();
+        ctx.moveTo(cx + Math.cos(a) * s * 0.45, cy + Math.sin(a) * s * 0.45);
+        ctx.lineTo(cx - Math.cos(a) * s * 0.45, cy - Math.sin(a) * s * 0.45);
+        ctx.stroke();
+      }
+      break;
+    }
+    case "exec_turnover": {
+      ctx.beginPath();
+      ctx.moveTo(cx - s * 0.4, cy - s * 0.15);
+      ctx.lineTo(cx + s * 0.1, cy + s * 0.25);
+      ctx.lineTo(cx + s * 0.45, cy - s * 0.2);
+      ctx.stroke();
+      break;
+    }
+    case "competitive_bakeoff": {
+      ctx.beginPath();
+      ctx.moveTo(cx - s * 0.35, cy - s * 0.25);
+      ctx.lineTo(cx + s * 0.35, cy + s * 0.25);
+      ctx.moveTo(cx + s * 0.35, cy - s * 0.25);
+      ctx.lineTo(cx - s * 0.35, cy + s * 0.25);
+      ctx.stroke();
+      break;
+    }
+    case "renewal_at_risk": {
+      ctx.beginPath();
+      ctx.arc(cx, cy, s * 0.22, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(cx, cy, s * 0.38, 0, Math.PI * 2);
+      ctx.stroke();
+      break;
+    }
+  }
+  ctx.restore();
+}
+
 export function drawLaneDefense(
   ctx: CanvasRenderingContext2D,
   state: GameState,
@@ -169,19 +250,19 @@ export function drawLaneDefense(
     ctx.lineWidth = 1;
     ctx.stroke();
 
+    drawEnemyGlyph(ctx, ex, y, er * 0.85, e.kind, theme.fg);
+
     const hpw = er * 2.4;
     ctx.fillStyle = theme.border;
-    ctx.fillRect(ex - hpw / 2, y - er * 2.05, hpw, 3);
+    ctx.fillRect(ex - hpw / 2, y - er * 2.15, hpw, 2.5);
     ctx.fillStyle = theme.accent;
-    ctx.fillRect(ex - hpw / 2, y - er * 2.05, hpw * Math.max(0, e.hp / e.maxHp), 3);
+    ctx.fillRect(ex - hpw / 2, y - er * 2.15, hpw * Math.max(0, e.hp / e.maxHp), 2.5);
 
-    ctx.font = `${Math.max(7, er * 2.2)}px ${mono}`;
+    ctx.font = `${Math.max(5, er * 1.35)}px ${mono}`;
     ctx.fillStyle = theme.fgMuted;
     ctx.textAlign = "center";
     ctx.textBaseline = "top";
-    const label = ENEMY_KIND_LABEL[e.kind];
-    const short = label.length > 14 ? `${label.slice(0, 12)}…` : label;
-    ctx.fillText(short, ex, y + er * 1.15);
+    ctx.fillText(ENEMY_KIND_ABBR[e.kind], ex, y + er * 1.05);
   }
 
   if (!opts.reducedMotion && state.phase === "combat") {

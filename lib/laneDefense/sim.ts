@@ -237,6 +237,17 @@ function applyTowerVolleys(state: GameState, dt: number): void {
   }
 }
 
+function removeOneRandomTower(state: GameState): void {
+  const pads: number[] = [];
+  for (const key of Object.keys(state.towers)) {
+    const i = Number(key);
+    if (!Number.isNaN(i) && state.towers[i]) pads.push(i);
+  }
+  if (pads.length === 0) return;
+  const pick = pads[Math.floor(Math.random() * pads.length)]!;
+  delete state.towers[pick];
+}
+
 export function tick(state: GameState, dt: number): void {
   if (state.phase !== "combat") return;
 
@@ -266,6 +277,7 @@ export function tick(state: GameState, dt: number): void {
     }
     if (e.t >= 1) {
       state.lives -= 1;
+      removeOneRandomTower(state);
       continue;
     }
     survived.push(e);
