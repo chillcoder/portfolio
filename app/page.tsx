@@ -69,17 +69,18 @@ const TILES: TileEntry[] = [
   { id: "work", Component: WorkAccordionTile, cols: 3, rows: 2 },
   { id: "skills", Component: SkillsTile, cols: 3, rows: 2 },
 
-  // Band 3 — context (3 + 3 = 6, both tall)
+  // Band 3 — context + credentials stacked under Skills (3 + 3 + 3 totals 6 per row)
+  // About spans rows 4–5 on the left. Education sits directly under Skills on
+  // row 4; WakaTime stacks under Education on row 5.
   { id: "about", Component: AboutTile, cols: 3, rows: 2 },
-  { id: "spotify", Component: SpotifyTile, cols: 3, rows: 2 },
+  { id: "education", Component: EducationTile, cols: 3 },
+  { id: "wakatime", Component: WakaTimeTile, cols: 3 },
 
-  // Band 4 — projects + stacked stats (4 + 2 = 6 per row, two rows tall)
-  // Projects becomes a tall scannable column; WakaTime and Education stack
-  // beside it as compact 2-col cards. Order matters here: Projects first so
-  // it claims the 4-col block; the two stat tiles backfill the right column.
+  // Band 4 — projects + spotify (4 + 2 = 6 per row, two rows tall)
+  // Projects is a tall scannable column on the left; Spotify becomes a narrow
+  // sidebar on the right.
   { id: "projects", Component: ProjectsTile, cols: 4, rows: 2 },
-  { id: "wakatime", Component: WakaTimeTile, cols: 2 },
-  { id: "education", Component: EducationTile, cols: 2 },
+  { id: "spotify", Component: SpotifyTile, cols: 2, rows: 2 },
 
   // Band 5 — closing (3 + 3 = 6, both tall)
   { id: "globe", Component: GlobeTile, cols: 3, rows: 2 },

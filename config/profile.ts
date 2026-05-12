@@ -141,23 +141,26 @@ export const WORK: WorkRole[] = [
 
 export const SKILLS: string[] = [
   "Customer success",
+  "Renewals & expansion",
   "Executive advisory",
   "Usage analytics",
   "Health scoring",
   "Enablement & training",
+  "Change management",
   "Salesforce",
   "Looker",
   "Tableau",
   "Jira",
   "Claude Code",
   "Cursor",
+  "TypeScript",
+  "Next.js",
   "Python",
   "SQL",
   "REST APIs",
   "Webhooks",
   "Prompt engineering",
   "AI agents",
-  "Change management",
 ];
 
 export interface Education {

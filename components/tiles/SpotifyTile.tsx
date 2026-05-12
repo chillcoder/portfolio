@@ -49,20 +49,33 @@ export function SpotifyTile({ span }: { span?: string }) {
                 href={now?.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-tile)] p-3 transition hover:bg-[var(--color-tile-hover)]"
+                className="group flex flex-col gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-tile)] p-3 transition hover:bg-[var(--color-tile-hover)]"
               >
-                {now?.albumImage ? (
-                  <Image
-                    src={now.albumImage}
-                    alt=""
-                    width={48}
-                    height={48}
-                    className="rounded-md"
-                    unoptimized
-                  />
-                ) : (
-                  <div className="size-12 rounded-md bg-[var(--color-bg-2)]" />
-                )}
+                <div className="relative aspect-square w-full overflow-hidden rounded-lg">
+                  {now?.albumImage ? (
+                    <Image
+                      src={now.albumImage}
+                      alt=""
+                      fill
+                      sizes="(min-width: 1280px) 220px, 100vw"
+                      className="object-cover transition duration-500 group-hover:scale-[1.03]"
+                      unoptimized
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-[var(--color-bg-2)]" />
+                  )}
+                  {now?.isPlaying && (
+                    <span
+                      aria-hidden
+                      className="absolute right-2 top-2 flex h-3 items-end gap-0.5 rounded-full bg-black/55 px-1.5 py-1 backdrop-blur"
+                      title="playing"
+                    >
+                      <Bar delay={0} />
+                      <Bar delay={120} />
+                      <Bar delay={240} />
+                    </span>
+                  )}
+                </div>
                 <div className="flex min-w-0 flex-col">
                   <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--color-accent-tertiary)]">
                     {now?.isPlaying ? "Playing" : "Recently played"}
@@ -74,17 +87,6 @@ export function SpotifyTile({ span }: { span?: string }) {
                     {now?.artist}
                   </span>
                 </div>
-                {now?.isPlaying && (
-                  <span
-                    aria-hidden
-                    className="ml-auto flex h-3 items-end gap-0.5"
-                    title="playing"
-                  >
-                    <Bar delay={0} />
-                    <Bar delay={120} />
-                    <Bar delay={240} />
-                  </span>
-                )}
               </a>
             ) : (
               <p className="text-sm text-[var(--color-fg-muted)]">
@@ -105,20 +107,20 @@ export function SpotifyTile({ span }: { span?: string }) {
                       href={a.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex w-16 flex-col items-center gap-1 text-center"
+                      className="flex w-14 flex-col items-center gap-1 text-center"
                       title={a.name}
                     >
                       {a.image ? (
                         <Image
                           src={a.image}
                           alt=""
-                          width={56}
-                          height={56}
-                          className="size-14 rounded-full object-cover"
+                          width={48}
+                          height={48}
+                          className="size-12 rounded-full object-cover"
                           unoptimized
                         />
                       ) : (
-                        <div className="size-14 rounded-full bg-[var(--color-bg-2)]" />
+                        <div className="size-12 rounded-full bg-[var(--color-bg-2)]" />
                       )}
                       <span className="line-clamp-2 text-[10px] text-[var(--color-fg-muted)]">
                         {a.name}
@@ -142,20 +144,20 @@ export function SpotifyTile({ span }: { span?: string }) {
                       href={t.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex w-[4.5rem] flex-col items-center gap-1 text-center"
+                      className="flex w-14 flex-col items-center gap-1 text-center"
                       title={`${t.name} — ${t.artist}`}
                     >
                       {t.image ? (
                         <Image
                           src={t.image}
                           alt=""
-                          width={56}
-                          height={56}
-                          className="size-14 rounded-md object-cover"
+                          width={48}
+                          height={48}
+                          className="size-12 rounded-md object-cover"
                           unoptimized
                         />
                       ) : (
-                        <div className="size-14 rounded-md bg-[var(--color-bg-2)]" />
+                        <div className="size-12 rounded-md bg-[var(--color-bg-2)]" />
                       )}
                       <span className="line-clamp-2 text-[10px] leading-tight text-[var(--color-fg)]">
                         {t.name}
