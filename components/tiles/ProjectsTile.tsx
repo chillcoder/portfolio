@@ -30,8 +30,9 @@ export function ProjectsTile({ span }: { span?: string }) {
                 </span>
                 <Badge
                   variant={p.status === "live" ? "accent" : p.status === "wip" ? "muted" : "outline"}
+                  className={p.statusLabel ? "!normal-case tracking-tight" : undefined}
                 >
-                  {STATUS_LABEL[p.status]}
+                  {p.statusLabel ?? STATUS_LABEL[p.status]}
                 </Badge>
               </div>
               <p className="text-xs text-[var(--color-fg-muted)]">{p.description}</p>

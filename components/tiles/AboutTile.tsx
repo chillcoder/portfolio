@@ -5,7 +5,14 @@ import { ABOUT_FACTS, QUOTE } from "@/config/profile";
 
 export function AboutTile({ span }: { span?: string }) {
   return (
-    <Tile span={span} eyebrow="About" title="Field notes" accent="tertiary">
+    <Tile
+      id="about"
+      span={span}
+      eyebrow="About"
+      title="Field notes"
+      accent="tertiary"
+      className="scroll-mt-28"
+    >
       <ul className="mt-4 space-y-2 text-sm">
         {ABOUT_FACTS.map((f) => (
           <li

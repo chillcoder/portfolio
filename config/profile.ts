@@ -196,6 +196,8 @@ export interface Project {
   description: string;
   href: string;
   status: "live" | "wip" | "archived";
+  /** When set, shown on the badge instead of the default label for `status`. */
+  statusLabel?: string;
   tags: string[];
 }
 
@@ -205,6 +207,7 @@ export const PROJECTS: Project[] = [
     description: "This portfolio—bento dashboard with live tiles (GitHub, Spotify, travel globe, photos).",
     href: "https://github.com/chillcoder/portfolio",
     status: "live",
+    statusLabel: "Live - Always Tinkering",
     tags: ["next.js", "tailwind", "posthog"],
   },
   {

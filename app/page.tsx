@@ -13,6 +13,7 @@ import { SpotifyTile } from "@/components/tiles/SpotifyTile";
 import { ProjectsTile } from "@/components/tiles/ProjectsTile";
 import { GlobeTile } from "@/components/tiles/GlobeTile";
 import { PhotosTile } from "@/components/tiles/PhotosTile";
+import { LaneDefenseTile } from "@/components/tiles/LaneDefenseTile";
 
 /**
  * Bento layout contract
@@ -85,6 +86,9 @@ const TILES: TileEntry[] = [
   // Band 5 — closing (3 + 3 = 6, both tall)
   { id: "globe", Component: GlobeTile, cols: 3, rows: 2 },
   { id: "photos", Component: PhotosTile, cols: 3, rows: 2 },
+
+  // Band 6 — lane defense (full width, above footer)
+  { id: "laneDefense", Component: LaneDefenseTile, cols: 6 },
 ];
 
 function spanFor(t: TileEntry): string {
