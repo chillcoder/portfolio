@@ -28,7 +28,7 @@ const PREVIEW_COUNT = 10;
  * How often to swap one tile in the grid for a fresh photo from the pool.
  * One tile at a time keeps the rotation calm rather than thrashing the whole grid.
  */
-const ROTATE_MS = 6500;
+const ROTATE_MS = 20000;
 
 export function PhotosTile({ span }: { span?: string }) {
   const reduced = useReducedMotion();
