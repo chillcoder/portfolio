@@ -60,6 +60,9 @@ export function PhotosTile({ span }: { span?: string }) {
         </button>
       }
     >
+      <p className="mt-1 text-xs italic text-[var(--color-fg-muted)]">
+        Very very amateur photographer.
+      </p>
       <div className="mt-4">
         {isLoading && !data ? (
           <TileSkeleton lines={4} />
