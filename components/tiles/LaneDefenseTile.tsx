@@ -8,6 +8,7 @@ import {
   LANE_DEFENSE_TOWER_TYPES,
   LANE_DEFENSE_UNLOCKS,
   LANE_DEFENSE_WAVES,
+  QUARTER_NAMES,
   type TowerTypeId,
 } from "@/config/laneDefense";
 import {
@@ -22,11 +23,24 @@ import {
 } from "@/lib/laneDefense/sim";
 import { drawLaneDefense, padIndexAtClient, type LaneLayout } from "@/lib/laneDefense/render";
 
-const SESSION_BEST_KEY = "laneDefense_bestWave";
+const SESSION_BEST_KEY = "renewalDefense_bestQuarter";
 const STEP = 1 / 60;
 const LAYOUT_PADDING = 28;
 
-function readBestWave(): number {
+const KONAMI_KEYS = [
+  "ArrowUp",
+  "ArrowUp",
+  "ArrowDown",
+  "ArrowDown",
+  "ArrowLeft",
+  "ArrowRight",
+  "ArrowLeft",
+  "ArrowRight",
+  "b",
+  "a",
+] as const;
+
+function readBestQuarter(): number {
   if (typeof window === "undefined") return 0;
   try {
     const v = window.sessionStorage.getItem(SESSION_BEST_KEY);
@@ -37,37 +51,53 @@ function readBestWave(): number {
   }
 }
 
-function writeBestWave(wavesCleared: number): void {
+function writeBestQuarter(quartersCleared: number): void {
   if (typeof window === "undefined") return;
   try {
-    const prev = readBestWave();
-    if (wavesCleared > prev) {
-      window.sessionStorage.setItem(SESSION_BEST_KEY, String(wavesCleared));
+    const prev = readBestQuarter();
+    if (quartersCleared > prev) {
+      window.sessionStorage.setItem(SESSION_BEST_KEY, String(quartersCleared));
     }
   } catch {
     /* ignore */
   }
 }
 
-function readTheme(el: HTMLElement): {
+function readRenewalTheme(el: HTMLElement): {
   fg: string;
   fgMuted: string;
   accent: string;
   border: string;
   lane: string;
+  canvasBg: string;
 } {
   const cs = getComputedStyle(el);
   const fg = cs.getPropertyValue("--color-fg").trim() || "#1a1a1a";
   const fgMuted = cs.getPropertyValue("--color-fg-muted").trim() || "#555";
-  const accent = cs.getPropertyValue("--tile-accent").trim() || "#2563eb";
+  const accent = cs.getPropertyValue("--color-accent-primary").trim() || "#ff5a1f";
   const border = cs.getPropertyValue("--color-border").trim() || "rgba(0,0,0,0.12)";
+  const canvasBg = cs.getPropertyValue("--color-bg").trim() || "#f5f3ee";
   return {
     fg,
     fgMuted,
     accent,
     border,
-    lane: accent,
+    lane: fg,
+    canvasBg,
   };
+}
+
+function countTowerTypes(state: GameState): Record<TowerTypeId, number> {
+  const c: Record<TowerTypeId, number> = {
+    automate: 0,
+    enable: 0,
+    discover: 0,
+    engage: 0,
+  };
+  for (const t of Object.values(state.towers)) {
+    if (t) c[t.typeId] += 1;
+  }
+  return c;
 }
 
 export function LaneDefenseTile({ span }: { span?: string }) {
@@ -77,8 +107,12 @@ export function LaneDefenseTile({ span }: { span?: string }) {
   const [userPaused, setUserPaused] = useState(false);
   const [selectedType, setSelectedType] = useState<TowerTypeId>("automate");
   const [uiPhase, setUiPhase] = useState(stateRef.current.phase);
-  const [bestWave, setBestWave] = useState(0);
+  const [bestQuarter, setBestQuarter] = useState(0);
   const [unlockAfterWave, setUnlockAfterWave] = useState<number | null>(null);
+  const [chessMode, setChessMode] = useState(false);
+  const [subtitleEaster, setSubtitleEaster] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -90,10 +124,16 @@ export function LaneDefenseTile({ span }: { span?: string }) {
   const userPausedRef = useRef(userPaused);
   const uiPhaseTrackRef = useRef(stateRef.current.phase);
   const lastUnlockShownRef = useRef<number | null>(null);
+  const konamiIdx = useRef(0);
+  const typeBuffer = useRef("");
+  const automateOnlyWarned = useRef(false);
+  const discoverEndToastSent = useRef(false);
+  const titleHoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const goldRef = useRef<HTMLSpanElement>(null);
-  const livesRef = useRef<HTMLSpanElement>(null);
-  const waveRef = useRef<HTMLSpanElement>(null);
+  const budgetRef = useRef<HTMLSpanElement>(null);
+  const healthRef = useRef<HTMLSpanElement>(null);
+  const quarterRef = useRef<HTMLSpanElement>(null);
+  const quarterNameRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     expandedRef.current = expanded;
@@ -103,16 +143,60 @@ export function LaneDefenseTile({ span }: { span?: string }) {
   }, [userPaused]);
 
   useEffect(() => {
-    setBestWave(readBestWave());
+    setBestQuarter(readBestQuarter());
+  }, []);
+
+  const showToast = useCallback((msg: string) => {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    setToast(msg);
+    toastTimerRef.current = setTimeout(() => setToast(null), 5200);
+  }, []);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const want = KONAMI_KEYS[konamiIdx.current];
+      const match =
+        want === "b" || want === "a" ? e.key.toLowerCase() === want : e.key === want;
+      if (match) {
+        konamiIdx.current += 1;
+        if (konamiIdx.current >= KONAMI_KEYS.length) {
+          konamiIdx.current = 0;
+          setChessMode(true);
+        }
+      } else {
+        konamiIdx.current = e.key === KONAMI_KEYS[0] ? 1 : 0;
+      }
+
+      if (e.key.length === 1 && /[a-z']/i.test(e.key)) {
+        typeBuffer.current = (typeBuffer.current + e.key.toLowerCase()).slice(-32);
+        if (
+          typeBuffer.current.includes("queen's gambit") ||
+          typeBuffer.current.includes("queens gambit")
+        ) {
+          setChessMode(true);
+          typeBuffer.current = "";
+        }
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, []);
 
   const syncHudDom = useCallback((s: GameState) => {
-    if (goldRef.current) goldRef.current.textContent = String(s.gold);
-    if (livesRef.current) livesRef.current.textContent = String(s.lives);
-    if (waveRef.current) {
+    if (budgetRef.current) budgetRef.current.textContent = String(s.gold);
+    if (healthRef.current) healthRef.current.textContent = String(s.lives);
+    if (quarterRef.current) {
       const cur = Math.min(s.waveIndex + 1, LANE_DEFENSE_WAVES.length);
-      waveRef.current.textContent =
-        s.phase === "won" ? "Complete" : s.phase === "lost" ? "—" : `${cur} / ${LANE_DEFENSE_WAVES.length}`;
+      quarterRef.current.textContent =
+        s.phase === "won" ? "Q10 · closed" : s.phase === "lost" ? "—" : `Q${cur} / Q10`;
+    }
+    if (quarterNameRef.current) {
+      if (s.phase === "won") quarterNameRef.current.textContent = QUARTER_NAMES[9] ?? "";
+      else if (s.phase === "lost") quarterNameRef.current.textContent = "";
+      else {
+        const idx = Math.min(s.waveIndex, QUARTER_NAMES.length - 1);
+        quarterNameRef.current.textContent = QUARTER_NAMES[idx] ?? "";
+      }
     }
   }, []);
 
@@ -140,10 +224,13 @@ export function LaneDefenseTile({ span }: { span?: string }) {
     ctx.clearRect(0, 0, w, h);
 
     const layout: LaneLayout = { width: w, height: h, padding: LAYOUT_PADDING };
-    const theme = readTheme(host);
-    drawLaneDefense(ctx, stateRef.current, layout, theme, { reducedMotion: reduced });
+    const theme = readRenewalTheme(host);
+    drawLaneDefense(ctx, stateRef.current, layout, theme, {
+      reducedMotion: reduced,
+      chessMode,
+    });
     syncHudDom(stateRef.current);
-  }, [reduced, syncHudDom]);
+  }, [reduced, syncHudDom, chessMode]);
 
   useEffect(() => {
     if (!expanded) {
@@ -172,11 +259,25 @@ export function LaneDefenseTile({ span }: { span?: string }) {
       }
 
       if (s.phase !== uiPhaseTrackRef.current) {
+        const prev = uiPhaseTrackRef.current;
         uiPhaseTrackRef.current = s.phase;
         setUiPhase(s.phase);
         if (s.phase === "won" || s.phase === "lost") {
-          writeBestWave(s.wavesCleared);
-          setBestWave(readBestWave());
+          writeBestQuarter(s.wavesCleared);
+          setBestQuarter(readBestQuarter());
+          const counts = countTowerTypes(s);
+          if (counts.discover === 0 && !discoverEndToastSent.current) {
+            discoverEndToastSent.current = true;
+            showToast("Visibility first. Discover catches what dashboards miss.");
+          }
+        }
+        if (prev === "combat" && s.phase === "intermission") {
+          const counts = countTowerTypes(s);
+          const total = counts.automate + counts.enable + counts.discover + counts.engage;
+          if (total >= 3 && counts.automate === total && !automateOnlyWarned.current) {
+            automateOnlyWarned.current = true;
+            showToast("Automation without enablement = brittle. Try Enable.");
+          }
         }
       }
 
@@ -191,7 +292,7 @@ export function LaneDefenseTile({ span }: { span?: string }) {
 
     rafRef.current = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [expanded, paint]);
+  }, [expanded, paint, showToast]);
 
   useEffect(() => {
     if (!expanded) return;
@@ -212,6 +313,12 @@ export function LaneDefenseTile({ span }: { span?: string }) {
     const pad = padIndexAtClient(layout, e.clientX, e.clientY, rect);
     if (pad === null) return;
     if (tryPlaceTower(s, pad, selectedType)) {
+      const counts = countTowerTypes(s);
+      const total = counts.automate + counts.enable + counts.discover + counts.engage;
+      if (total >= 3 && counts.automate === total && !automateOnlyWarned.current) {
+        automateOnlyWarned.current = true;
+        showToast("Automation without enablement = brittle. Try Enable.");
+      }
       paint();
     }
   };
@@ -233,7 +340,7 @@ export function LaneDefenseTile({ span }: { span?: string }) {
       type="button"
       className="flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-tile)] text-[var(--color-fg)] transition hover:bg-[var(--color-tile-hover)]"
       aria-expanded={expanded}
-      aria-controls="lane-defense-panel"
+      aria-controls="renewal-defense-panel"
       onClick={() => {
         setExpanded((v) => !v);
         if (expanded) setUserPaused(true);
@@ -257,40 +364,82 @@ export function LaneDefenseTile({ span }: { span?: string }) {
   );
 
   const state = stateRef.current;
+  const loseCopy =
+    state.churnArrDisplay ? `Account churned. -${state.churnArrDisplay} ARR.` : "Account churned.";
 
   return (
     <Tile
       span={span}
-      accent="secondary"
+      accent="primary"
       eyebrow="Play"
-      title="Lane defense"
+      title={
+        <span className="block">
+          <span
+            className="inline-block"
+            onMouseEnter={() => {
+              titleHoverTimer.current = setTimeout(() => setSubtitleEaster(true), 3000);
+            }}
+            onMouseLeave={() => {
+              if (titleHoverTimer.current) clearTimeout(titleHoverTimer.current);
+              titleHoverTimer.current = null;
+              setSubtitleEaster(false);
+            }}
+          >
+            Renewal defense
+          </span>
+          <span className="mt-1 block text-xs font-normal font-mono text-[var(--color-fg-muted)]">
+            {subtitleEaster ?
+              "Built in Cursor between QBRs."
+            : "Defend the account. Ten quarters to renewal."}
+          </span>
+        </span>
+      }
       action={collapseToggle}
       className="min-h-0"
     >
-      <div ref={themeHostRef} className="flex flex-col gap-3">
+      <div ref={themeHostRef} className="relative flex flex-col gap-3 font-[family-name:var(--font-sans)]">
         {!expanded && (
           <p className="text-sm text-[var(--color-fg-muted)]">
-            One lane, three build types—hold the line between risk and the base. Best wave cleared:{" "}
-            <span className="font-mono text-[var(--color-fg)]">{bestWave}</span>.
+            One lane, four motions—defend the account through ten quarters. Best quarter cleared{" "}
+            <span className="font-mono text-[var(--color-fg)]">{bestQuarter}</span>.
           </p>
         )}
 
+        {(!expanded || userPaused) && (
+          <p className="text-[11px] leading-snug text-[var(--color-fg-muted)]">
+            Yes, this is a real portfolio. Yes, I built a game about my job. Builder identity confirmed.
+          </p>
+        )}
+
+        {toast && (
+          <div
+            role="status"
+            className="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-2)] px-3 py-2 font-mono text-[11px] text-[var(--color-fg)]"
+          >
+            {toast}
+          </div>
+        )}
+
         {expanded && (
-          <div id="lane-defense-panel" className="flex flex-col gap-3">
+          <div id="renewal-defense-panel" className="flex flex-col gap-3">
             <div
-              className="flex flex-wrap items-center gap-3 text-sm"
+              className="flex flex-col gap-0.5 font-mono text-sm"
               aria-live="polite"
               aria-atomic="true"
             >
-              <span className="font-mono text-[var(--color-fg-muted)]">
-                Gold <span ref={goldRef} className="text-[var(--color-fg)]">{state.gold}</span>
-              </span>
-              <span className="font-mono text-[var(--color-fg-muted)]">
-                Lives <span ref={livesRef} className="text-[var(--color-fg)]">{state.lives}</span>
-              </span>
-              <span className="font-mono text-[var(--color-fg-muted)]">
-                Wave <span ref={waveRef} className="text-[var(--color-fg)]">—</span>
-              </span>
+              <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+                <span className="text-[var(--color-fg-muted)]">
+                  Budget <span ref={budgetRef} className="text-[var(--color-fg)]">{state.gold}</span>
+                </span>
+                <span className="text-[var(--color-fg-muted)]">
+                  Account health{" "}
+                  <span ref={healthRef} className="text-[var(--color-fg)]">{state.lives}</span>
+                </span>
+                <span className="text-[var(--color-fg-muted)]">
+                  Quarter <span ref={quarterRef} className="text-[var(--color-fg)]">—</span>
+                </span>
+              </div>
+              <span ref={quarterNameRef} className="text-[11px] text-[var(--color-fg-muted)]" />
             </div>
 
             {unlockCopy && (
@@ -325,17 +474,18 @@ export function LaneDefenseTile({ span }: { span?: string }) {
               <canvas
                 ref={canvasRef}
                 role="img"
-                aria-label="Single-lane tower defense playfield. Enemies move left to right; you place towers on pads during breaks between waves."
+                aria-label="Renewal defense: risk moves along a single lane toward the account; deploy motions on pads between quarters."
                 className="block h-full w-full touch-manipulation"
                 onClick={handleCanvasClick}
               />
             </div>
 
-            <div className="flex flex-wrap gap-2" role="group" aria-label="Tower type">
+            <div className="flex flex-wrap gap-2" role="group" aria-label="CS motion">
               {LANE_DEFENSE_TOWER_TYPES.map((t) => (
                 <button
                   key={t.id}
                   type="button"
+                  title={t.tooltip}
                   disabled={
                     state.phase === "combat" || state.phase === "idle" || state.phase === "won" || state.phase === "lost"
                   }
@@ -350,13 +500,13 @@ export function LaneDefenseTile({ span }: { span?: string }) {
                   )}
                 >
                   <span className="block font-medium text-[var(--color-fg)]">{t.label}</span>
-                  <span className="font-mono text-[10px] text-[var(--color-fg-muted)]">{t.cost}g</span>
+                  <span className="font-mono text-[10px] text-[var(--color-fg-muted)]">{t.cost} budget</span>
                 </button>
               ))}
             </div>
 
             <p className="text-xs text-[var(--color-fg-muted)]">
-              Between waves, pick a tower type and tap a pad on the lane. Start each wave when ready.
+              Between quarters, deploy a CS motion on the lane. Start each quarter when ready.
             </p>
 
             <div className="flex flex-wrap gap-2">
@@ -365,6 +515,8 @@ export function LaneDefenseTile({ span }: { span?: string }) {
                   type="button"
                   className="min-h-11 rounded-lg bg-[var(--tile-accent)] px-4 text-sm font-medium text-white"
                   onClick={() => {
+                    automateOnlyWarned.current = false;
+                    discoverEndToastSent.current = false;
                     beginRun(stateRef.current);
                     uiPhaseTrackRef.current = stateRef.current.phase;
                     setUiPhase(stateRef.current.phase);
@@ -372,7 +524,7 @@ export function LaneDefenseTile({ span }: { span?: string }) {
                     paint();
                   }}
                 >
-                  Begin run
+                  Begin renewal
                 </button>
               )}
 
@@ -389,7 +541,7 @@ export function LaneDefenseTile({ span }: { span?: string }) {
                     paint();
                   }}
                 >
-                  Start wave {state.waveIndex + 1}
+                  Start Q{state.waveIndex + 1}
                 </button>
               )}
 
@@ -412,13 +564,15 @@ export function LaneDefenseTile({ span }: { span?: string }) {
                     setUserPaused(false);
                     setUnlockAfterWave(null);
                     lastUnlockShownRef.current = null;
+                    automateOnlyWarned.current = false;
+                    discoverEndToastSent.current = false;
                     uiPhaseTrackRef.current = stateRef.current.phase;
                     setUiPhase(stateRef.current.phase);
                     accRef.current = 0;
                     paint();
                   }}
                 >
-                  Restart run
+                  New account
                 </button>
               )}
             </div>
@@ -426,8 +580,8 @@ export function LaneDefenseTile({ span }: { span?: string }) {
             {(uiPhase === "won" || uiPhase === "lost") && (
               <p className="text-sm font-medium text-[var(--color-fg)]">
                 {uiPhase === "won" ?
-                  "You cleared all waves—thanks for playing."
-                : "Base overrun—restart and try a different layout."}
+                  "Renewed and expanded. +115% NRR."
+                : loseCopy}
               </p>
             )}
           </div>

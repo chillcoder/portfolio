@@ -27,12 +27,23 @@ describe("laneDefense sim", () => {
     expect(s.phase).toBe("combat");
 
     const w = LANE_DEFENSE_WAVES[0]!;
-    s.enemies = [{ id: 1, t: 0.5, hp: 1, maxHp: 1, speed: w.enemySpeed }];
+    s.enemies = [
+      {
+        id: 1,
+        t: 0.5,
+        hp: 0.5,
+        maxHp: 0.5,
+        speed: w.enemySpeed,
+        kind: "low_adoption",
+      },
+    ];
     const goldBefore = s.gold;
-    tick(s, 1 / 30);
+    for (let i = 0; i < 40; i++) tick(s, 1 / 30);
     expect(s.gold).toBeGreaterThan(goldBefore);
 
-    s.enemies = [{ id: 2, t: 0.99, hp: 999, maxHp: 999, speed: 10 }];
+    s.enemies = [
+      { id: 2, t: 0.99, hp: 999, maxHp: 999, speed: 10, kind: "low_adoption" },
+    ];
     const livesBefore = s.lives;
     tick(s, 0.5);
     expect(s.lives).toBeLessThan(livesBefore);
@@ -44,9 +55,10 @@ describe("laneDefense sim", () => {
     startNextWave(s);
     s.lives = 1;
     s.spawnRemaining = 0;
-    s.enemies = [{ id: 1, t: 0.99, hp: 999, maxHp: 999, speed: 50 }];
+    s.enemies = [{ id: 1, t: 0.99, hp: 999, maxHp: 999, speed: 50, kind: "low_adoption" }];
     tick(s, 1);
     expect(s.phase).toBe("lost");
+    expect(s.churnArrDisplay).toBeTruthy();
   });
 
   it("advances wave when combat clears", () => {

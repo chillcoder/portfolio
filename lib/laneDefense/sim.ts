@@ -1,9 +1,12 @@
 import {
+  ENEMY_KIND_STATS,
   LANE_DEFENSE_ECONOMY,
   LANE_DEFENSE_PAD_T,
   LANE_DEFENSE_TOWER_TYPES,
   LANE_DEFENSE_UNLOCKS,
   LANE_DEFENSE_WAVES,
+  pickEnemyKind,
+  type EnemyKind,
   type TowerTypeId,
 } from "@/config/laneDefense";
 
@@ -14,6 +17,8 @@ export interface PlacedTower {
   /** Lane position t in [0,1]. */
   t: number;
   typeId: TowerTypeId;
+  /** Seconds until next volley; <= 0 means ready. */
+  cd: number;
 }
 
 export interface Enemy {
@@ -22,13 +27,14 @@ export interface Enemy {
   hp: number;
   maxHp: number;
   speed: number;
+  kind: EnemyKind;
 }
 
 export type GamePhase = "idle" | "intermission" | "combat" | "won" | "lost";
 
 export interface GameState {
   phase: GamePhase;
-  /** Wave currently in combat or next to start (0-based). */
+  /** Quarter currently in combat or next to start (0-based). */
   waveIndex: number;
   gold: number;
   lives: number;
@@ -36,18 +42,31 @@ export interface GameState {
   enemies: Enemy[];
   spawnRemaining: number;
   spawnCooldown: number;
-  /** Waves cleared (0..WAVES.length). */
+  /** Quarters cleared (0..WAVES.length). */
   wavesCleared: number;
-  /** Unlock milestones already surfaced to UI. */
   unlocksShown: Set<number>;
-  /** Pending unlock afterWaveCleared for UI (cleared when dismissed). */
   pendingUnlockAfterWave: number | null;
+  /** Set when phase becomes lost; ARR string for UI. */
+  churnArrDisplay: string | null;
 }
 
 export function towerTypeDef(id: TowerTypeId) {
   const def = LANE_DEFENSE_TOWER_TYPES.find((t) => t.id === id);
   if (!def) throw new Error(`Unknown tower type: ${id}`);
   return def;
+}
+
+function randomChurnArrDisplay(): string {
+  const min = 200_000;
+  const max = 1_200_000;
+  const v = Math.floor(min + Math.random() * (max - min + 1));
+  if (v >= 1_000_000) {
+    const m = v / 1_000_000;
+    const s = m >= 10 ? m.toFixed(1) : m.toFixed(2).replace(/\.?0+$/, "");
+    return `$${s}M`;
+  }
+  const k = Math.round(v / 1000);
+  return `$${k}K`;
 }
 
 export function createInitialState(): GameState {
@@ -64,10 +83,10 @@ export function createInitialState(): GameState {
     wavesCleared: 0,
     unlocksShown: new Set(),
     pendingUnlockAfterWave: null,
+    churnArrDisplay: null,
   };
 }
 
-/** First start from tile idle, or full restart after win/loss. */
 export function restartRun(state: GameState): void {
   state.phase = "intermission";
   state.waveIndex = 0;
@@ -80,10 +99,10 @@ export function restartRun(state: GameState): void {
   state.wavesCleared = 0;
   state.unlocksShown = new Set();
   state.pendingUnlockAfterWave = null;
+  state.churnArrDisplay = null;
   nextEnemyId = 1;
 }
 
-/** Transition from idle to intermission so the player can place towers. */
 export function beginRun(state: GameState): void {
   if (state.phase !== "idle") return;
   restartRun(state);
@@ -102,9 +121,9 @@ export function startNextWave(state: GameState): void {
   state.spawnCooldown = 0.01;
 }
 
-function applyUnlockMilestone(state: GameState, clearedWave1Based: number): void {
+function applyUnlockMilestone(state: GameState, clearedQuarter1Based: number): void {
   for (const u of LANE_DEFENSE_UNLOCKS) {
-    if (u.afterWaveCleared !== clearedWave1Based) continue;
+    if (u.afterWaveCleared !== clearedQuarter1Based) continue;
     if (state.unlocksShown.has(u.afterWaveCleared)) continue;
     state.unlocksShown.add(u.afterWaveCleared);
     state.pendingUnlockAfterWave = u.afterWaveCleared;
@@ -138,7 +157,7 @@ export function tryPlaceTower(state: GameState, padIndex: number, typeId: TowerT
   state.gold -= def.cost;
   const t = LANE_DEFENSE_PAD_T[padIndex];
   if (t === undefined) return false;
-  state.towers[padIndex] = { padIndex, t, typeId };
+  state.towers[padIndex] = { padIndex, t, typeId, cd: 0 };
   return true;
 }
 
@@ -149,12 +168,18 @@ export function dismissPendingUnlock(state: GameState): void {
 function spawnEnemy(state: GameState): void {
   const w = LANE_DEFENSE_WAVES[state.waveIndex];
   if (!w) return;
+  const spawnIndex = w.enemyCount - state.spawnRemaining;
+  const kind = pickEnemyKind(state.waveIndex, spawnIndex, w.enemyCount);
+  const mul = ENEMY_KIND_STATS[kind];
+  const hp = w.enemyHp * mul.hpMul;
+  const speed = w.enemySpeed * mul.speedMul;
   state.enemies.push({
     id: nextEnemyId++,
     t: 0,
-    hp: w.enemyHp,
-    maxHp: w.enemyHp,
-    speed: w.enemySpeed,
+    hp,
+    maxHp: hp,
+    speed,
+    kind,
   });
   state.spawnRemaining -= 1;
 }
@@ -173,23 +198,41 @@ function effectiveSlowForEnemy(state: GameState, enemyT: number): number {
   return slow;
 }
 
-function applyTowerDamage(state: GameState, dt: number): void {
+function enemiesInRangeSorted(state: GameState, tower: PlacedTower): Enemy[] {
+  const def = towerTypeDef(tower.typeId);
+  const list: { e: Enemy; d: number }[] = [];
+  for (const e of state.enemies) {
+    const dist = Math.abs(e.t - tower.t);
+    if (dist <= def.range) list.push({ e, d: dist });
+  }
+  list.sort((a, b) => a.d - b.d);
+  return list.map((x) => x.e);
+}
+
+const MAX_VOLLEYS_PER_TOWER_PER_TICK = 12;
+
+function applyTowerVolleys(state: GameState, dt: number): void {
   for (const tower of Object.values(state.towers)) {
     if (!tower) continue;
     const def = towerTypeDef(tower.typeId);
-
-    let best: Enemy | null = null;
-    let bestDist = Infinity;
-    for (const e of state.enemies) {
-      const dist = Math.abs(e.t - tower.t);
-      if (dist > def.range) continue;
-      if (dist < bestDist) {
-        bestDist = dist;
-        best = e;
+    tower.cd -= dt;
+    let bursts = 0;
+    while (tower.cd <= 0 && bursts < MAX_VOLLEYS_PER_TOWER_PER_TICK) {
+      const targets = enemiesInRangeSorted(state, tower);
+      if (targets.length === 0) {
+        tower.cd = 0;
+        break;
       }
-    }
-    if (best) {
-      best.hp -= def.dps * dt;
+      if (def.hitsAllInRange) {
+        for (const e of targets) {
+          e.hp -= def.damagePerShot;
+        }
+      } else {
+        const e = targets[0];
+        if (e) e.hp -= def.damagePerShot;
+      }
+      tower.cd += def.fireIntervalSec;
+      bursts += 1;
     }
   }
 }
@@ -213,7 +256,7 @@ export function tick(state: GameState, dt: number): void {
     e.t += e.speed * slow * dt;
   }
 
-  applyTowerDamage(state, dt);
+  applyTowerVolleys(state, dt);
 
   const survived: Enemy[] = [];
   for (const e of state.enemies) {
@@ -232,6 +275,7 @@ export function tick(state: GameState, dt: number): void {
   if (state.lives <= 0) {
     state.phase = "lost";
     state.enemies = [];
+    state.churnArrDisplay = randomChurnArrDisplay();
     return;
   }
 

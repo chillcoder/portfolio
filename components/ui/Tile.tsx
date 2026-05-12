@@ -12,9 +12,9 @@ const ACCENT_VAR: Record<Accent, string> = {
   neutral: "var(--color-fg-muted)",
 };
 
-export interface TileProps extends HTMLAttributes<HTMLDivElement> {
+export interface TileProps extends Omit<HTMLAttributes<HTMLDivElement>, "title"> {
   accent?: Accent;
-  title?: string;
+  title?: ReactNode;
   eyebrow?: string;
   action?: ReactNode;
   padded?: boolean;
