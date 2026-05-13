@@ -8,6 +8,10 @@ export interface SpotifyTokens {
 }
 
 async function readRefreshToken(): Promise<string | null> {
+  /** Prefer env so Vercel/hosting updates apply even if KV still holds an older token from a past OAuth. */
+  const fromEnv = process.env.SPOTIFY_LIVE_REFRESH_TOKEN?.trim();
+  if (fromEnv) return fromEnv;
+
   const redis = getRedis();
   if (redis) {
     try {
@@ -17,7 +21,7 @@ async function readRefreshToken(): Promise<string | null> {
       /* fallthrough */
     }
   }
-  return process.env.SPOTIFY_LIVE_REFRESH_TOKEN ?? null;
+  return null;
 }
 
 async function writeRefreshToken(token: string): Promise<void> {

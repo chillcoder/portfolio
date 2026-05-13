@@ -4,6 +4,8 @@ import Image from "next/image";
 import { Tile } from "@/components/ui/Tile";
 import { TileSkeleton } from "@/components/ui/TileSkeleton";
 import { useCachedFetch } from "@/hooks/useCachedFetch";
+import type { SpotifyTopPayload } from "@/lib/portfolio-data";
+import { spotifyTrendsEmptyMessage } from "@/lib/spotifyTrendsCopy";
 
 interface SpotifyStats {
   isPlaying: boolean;
@@ -15,18 +17,13 @@ interface SpotifyStats {
   lastPlayedAt?: string;
 }
 
-interface SpotifyTop {
-  topArtists: { name: string; image: string | null; url: string }[];
-  topTracks: { name: string; artist: string; image: string | null; url: string }[];
-}
-
 export function SpotifyTile({ span }: { span?: string }) {
   const { data: now, isLoading: loadingNow } = useCachedFetch<SpotifyStats>(
     "/api/spotify-stats",
     { cacheKey: "spotify_now", ttl: 60 * 1000, intervalMs: 60 * 1000 },
   );
-  const { data: top } = useCachedFetch<SpotifyTop>("/api/spotify-top", {
-    cacheKey: "spotify_top",
+  const { data: top } = useCachedFetch<SpotifyTopPayload>("/api/spotify-top", {
+    cacheKey: "spotify_top_v2",
     ttl: 60 * 60 * 1000,
   });
 
@@ -97,12 +94,12 @@ export function SpotifyTile({ span }: { span?: string }) {
 
           <div className="flex flex-col gap-2">
             <span className="text-sm font-medium text-[var(--color-fg)]">
-              Songs I&apos;ve been into lately
+              tracks I&apos;ve been into lately
             </span>
             {top ? (
               top.topTracks.length === 0 ? (
                 <p className="text-xs text-[var(--color-fg-muted)]">
-                  Spotify trends unavailable right now.
+                  {spotifyTrendsEmptyMessage(top.trendsIssue)}
                 </p>
               ) : (
                 <ul className="flex gap-2 overflow-x-auto pb-1">
@@ -159,7 +156,7 @@ export function SpotifyTile({ span }: { span?: string }) {
             {top ? (
               top.topArtists.length === 0 ? (
                 <p className="text-xs text-[var(--color-fg-muted)]">
-                  Spotify trends unavailable right now.
+                  {spotifyTrendsEmptyMessage(top.trendsIssue)}
                 </p>
               ) : (
                 <ul className="flex gap-2 overflow-x-auto pb-1">

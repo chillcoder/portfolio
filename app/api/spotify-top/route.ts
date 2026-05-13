@@ -17,9 +17,13 @@ interface TopTrack {
   url: string;
 }
 
+export type SpotifyTrendsIssue = "no_token" | "scope" | "empty" | "api";
+
 export interface SpotifyTopResponse {
   topArtists: TopArtist[];
   topTracks: TopTrack[];
+  /** Present when both lists are empty; helps distinguish missing scope vs no listening data. */
+  trendsIssue?: SpotifyTrendsIssue;
 }
 
 export async function GET(req: Request) {
@@ -29,7 +33,11 @@ export async function GET(req: Request) {
     if (!token) {
       captureServerEvent("spotify_top_error", { reason: "no_token" }, distinctId);
       return NextResponse.json(
-        { topArtists: [], topTracks: [] } satisfies SpotifyTopResponse,
+        {
+          topArtists: [],
+          topTracks: [],
+          trendsIssue: "no_token",
+        } satisfies SpotifyTopResponse,
         { headers: { "X-Spotify-Top": "no-token" } },
       );
     }
@@ -56,6 +64,12 @@ export async function GET(req: Request) {
         distinctId,
       );
     }
+
+    const scopeLikelyMissing =
+      artistsRes.status === 403 ||
+      tracksRes.status === 403 ||
+      artistsRes.status === 401 ||
+      tracksRes.status === 401;
 
     const topArtists: TopArtist[] = artistsRes.ok
       ? ((await artistsRes.json()) as {
@@ -87,11 +101,19 @@ export async function GET(req: Request) {
           })) ?? []
       : [];
 
+    const bothEmpty = topArtists.length === 0 && topTracks.length === 0;
+    let trendsIssue: SpotifyTrendsIssue | undefined;
+    if (bothEmpty) {
+      if (scopeLikelyMissing) trendsIssue = "scope";
+      else if (!artistsRes.ok || !tracksRes.ok) trendsIssue = "api";
+      else trendsIssue = "empty";
+    }
+
     return NextResponse.json(
-      { topArtists, topTracks } satisfies SpotifyTopResponse,
+      { topArtists, topTracks, trendsIssue } satisfies SpotifyTopResponse,
       {
         headers: {
-          "X-Spotify-Top": `ok artists=${artistsRes.status}/${topArtists.length} tracks=${tracksRes.status}/${topTracks.length}`,
+          "X-Spotify-Top": `ok artists=${artistsRes.status}/${topArtists.length} tracks=${tracksRes.status}/${topTracks.length}${trendsIssue ? ` issue=${trendsIssue}` : ""}`,
         },
       },
     );
@@ -99,7 +121,11 @@ export async function GET(req: Request) {
     const reason = error instanceof Error ? error.message : "unknown";
     captureServerEvent("spotify_top_error", { reason }, distinctId);
     return NextResponse.json(
-      { topArtists: [], topTracks: [] } satisfies SpotifyTopResponse,
+      {
+        topArtists: [],
+        topTracks: [],
+        trendsIssue: "api",
+      } satisfies SpotifyTopResponse,
       { headers: { "X-Spotify-Top": `error: ${reason.slice(0, 80)}` } },
     );
   }

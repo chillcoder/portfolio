@@ -6,6 +6,7 @@ import type {
   SpotifyNowPayload,
   SpotifyTopPayload,
 } from "@/lib/portfolio-data";
+import { spotifyTrendsEmptyMessage } from "@/lib/spotifyTrendsCopy";
 import styles from "@/app/os/os.module.css";
 
 /** Static zigzag waveform — pure aesthetic, not derived from audio. */
@@ -40,7 +41,7 @@ export function NowPlayingWindow() {
     { cacheKey: "os_spotify_now", ttl: 60_000, intervalMs: 60_000 },
   );
   const { data: top } = useCachedFetch<SpotifyTopPayload>("/api/spotify-top", {
-    cacheKey: "os_spotify_top",
+    cacheKey: "os_spotify_top_v2",
     ttl: 60 * 60 * 1000,
   });
 
@@ -94,11 +95,13 @@ export function NowPlayingWindow() {
 
       <section>
         <span className={styles.mediaSectionLabel}>
-          Songs I&apos;ve been into lately
+          tracks I&apos;ve been into lately
         </span>
         {top ? (
           tracks.length === 0 ? (
-            <p className={styles.mediaEmpty}>Spotify trends unavailable.</p>
+            <p className={styles.mediaEmpty}>
+              {spotifyTrendsEmptyMessage(top.trendsIssue)}
+            </p>
           ) : (
             <ul className={styles.mediaList}>
               {tracks.map((t, i) => (
@@ -126,7 +129,9 @@ export function NowPlayingWindow() {
         <span className={styles.mediaSectionLabel}>Recent artists</span>
         {top ? (
           artists.length === 0 ? (
-            <p className={styles.mediaEmpty}>Spotify trends unavailable.</p>
+            <p className={styles.mediaEmpty}>
+              {spotifyTrendsEmptyMessage(top.trendsIssue)}
+            </p>
           ) : (
             <ul className={styles.mediaArtistRow}>
               {artists.map((a, i) => (

@@ -361,6 +361,8 @@ export interface SpotifyNowPayload {
   lastPlayedAt?: string;
 }
 
+export type SpotifyTrendsIssue = "no_token" | "scope" | "empty" | "api";
+
 export interface SpotifyTopPayload {
   topArtists: { name: string; image: string | null; url: string }[];
   topTracks: {
@@ -369,6 +371,7 @@ export interface SpotifyTopPayload {
     image: string | null;
     url: string;
   }[];
+  trendsIssue?: SpotifyTrendsIssue;
 }
 
 export interface PhotosPayload {
