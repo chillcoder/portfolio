@@ -155,11 +155,26 @@ function PhysicsField({ skills }: { skills: readonly string[] }) {
       const runner = Runner.create();
       Runner.run(runner, engine);
 
-      const fg =
-        getComputedStyle(document.documentElement).getPropertyValue("--color-fg").trim() ||
-        "#1a1a1a";
-      const stroke = "rgba(255,90,31,0.45)";
-      const fill = "rgba(255,255,255,0.08)";
+      const palette = { fg: "#1a1a1a", stroke: "rgba(255,90,31,0.45)", fill: "rgba(255,255,255,0.08)" };
+
+      const readPalette = () => {
+        const styles = getComputedStyle(document.documentElement);
+        const fg = styles.getPropertyValue("--color-fg").trim();
+        const accent = styles.getPropertyValue("--color-accent-primary").trim();
+        const isDarkBg =
+          (document.documentElement.getAttribute("data-theme") ?? "light") !== "light" &&
+          document.documentElement.getAttribute("data-theme") !== "posthog";
+        if (fg) palette.fg = fg;
+        if (accent) palette.stroke = `color-mix(in oklab, ${accent} 55%, transparent)`;
+        palette.fill = isDarkBg ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.55)";
+      };
+      readPalette();
+
+      const themeObserver = new MutationObserver(readPalette);
+      themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ["data-theme"],
+      });
 
       let drawRaf = 0;
       const draw = () => {
@@ -180,8 +195,8 @@ function PhysicsField({ skills }: { skills: readonly string[] }) {
             ctx.lineTo(verts[j].x, verts[j].y);
           }
           ctx.closePath();
-          ctx.fillStyle = fill;
-          ctx.strokeStyle = stroke;
+          ctx.fillStyle = palette.fill;
+          ctx.strokeStyle = palette.stroke;
           ctx.lineWidth = 1;
           ctx.fill();
           ctx.stroke();
@@ -189,7 +204,7 @@ function PhysicsField({ skills }: { skills: readonly string[] }) {
           ctx.save();
           ctx.translate(b.position.x, b.position.y);
           ctx.rotate(b.angle);
-          ctx.fillStyle = fg;
+          ctx.fillStyle = palette.fg;
           ctx.font =
             '11px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace';
           ctx.textAlign = "center";
@@ -217,6 +232,7 @@ function PhysicsField({ skills }: { skills: readonly string[] }) {
 
       dispose = () => {
         cancelAnimationFrame(drawRaf);
+        themeObserver.disconnect();
         Runner.stop(runner);
         detachMouse();
         World.clear(engine.world, false);
