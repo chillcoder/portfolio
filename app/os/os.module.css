@@ -456,3 +456,581 @@
   align-items: center;
   justify-content: center;
 }
+
+/* ---------- Window slot positioning ---------- */
+
+.windowSlotMain {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(560px, calc(100vw - 32px));
+  max-height: min(72vh, calc(100% - 32px));
+}
+
+.windowSlotPinned {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  width: 280px;
+  max-height: 360px;
+}
+
+.windowSlotPlay {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(720px, calc(100vw - 32px));
+  max-height: min(80vh, calc(100% - 32px));
+}
+
+@media (max-width: 768px) {
+  .windowSlotPinned {
+    display: none;
+  }
+}
+
+/* ---------- About / markdown windows ---------- */
+
+.markdownFrontmatter {
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+  font-size: 12px;
+  color: var(--os-muted);
+  background: transparent;
+  margin: 0 0 12px 0;
+  padding: 0;
+  white-space: pre-wrap;
+}
+
+.markdownBody {
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+  font-size: 13px;
+  color: var(--os-ink);
+  line-height: 1.55;
+}
+
+/* ---------- Career log ---------- */
+
+.careerLog {
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--os-ink);
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.careerLogLine {
+  display: block;
+}
+
+.careerLogDate {
+  color: var(--os-muted);
+}
+
+.careerLogEvent {
+  color: var(--os-accent);
+  font-weight: 600;
+}
+
+.careerLogSep {
+  color: var(--os-muted);
+}
+
+.careerLogEof {
+  display: block;
+  margin-top: 12px;
+  color: var(--os-muted);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+}
+
+/* ---------- Projects ---------- */
+
+.projectsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.projectRowWrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.projectRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  background: transparent;
+  border: 0;
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+  font-size: 13px;
+  color: var(--os-ink);
+  cursor: default;
+  text-align: left;
+}
+
+.projectRow:hover {
+  background: var(--os-chrome);
+}
+
+.projectChevron {
+  width: 10px;
+  text-align: center;
+  font-size: 10px;
+  color: var(--os-muted);
+}
+
+.projectFilename {
+  flex: 1 1 auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.projectExt {
+  opacity: 0.6;
+}
+
+.statusBadge {
+  display: inline-block;
+  flex: 0 0 auto;
+  padding: 0 5px;
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  border: 1px solid var(--os-border);
+  background: var(--os-accent);
+  color: #fff;
+  line-height: 14px;
+}
+
+.statusBadgeArchive {
+  background: #a8a39a;
+  color: #fff;
+}
+
+.projectDetail {
+  margin: 4px 0 8px 28px;
+  padding: 8px 10px;
+  border: 1px dashed var(--os-border);
+  background: rgba(0, 0, 0, 0.02);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--os-ink);
+}
+
+.projectTags {
+  margin-top: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.projectTag {
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+  font-size: 10px;
+  color: var(--os-muted);
+}
+
+.projectLink {
+  display: inline-block;
+  margin-top: 8px;
+  color: var(--os-accent);
+  font-size: 12px;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ---------- Field notes ---------- */
+
+.fieldNotes {
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+  font-size: 13px;
+  color: var(--os-ink);
+}
+
+.fieldSection,
+.fieldSectionLast {
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px dashed var(--os-border);
+}
+
+.fieldSectionLast {
+  border-bottom: 0;
+}
+
+.fieldSectionLabel {
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--os-muted);
+  margin-bottom: 3px;
+}
+
+.fieldSectionValue {
+  color: var(--os-ink);
+  line-height: 1.45;
+}
+
+.fieldQuote {
+  margin: 18px 0 0 0;
+  text-align: center;
+  font-style: italic;
+  color: var(--os-muted);
+  font-size: 13px;
+  line-height: 1.45;
+  padding: 0 12px;
+}
+
+.fieldQuoteAttr {
+  display: block;
+  margin-top: 6px;
+  font-style: normal;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+
+/* ---------- Travel ---------- */
+
+.travelStats {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+  font-size: 13px;
+  color: var(--os-ink);
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+  border-bottom: 1px dashed var(--os-border);
+}
+
+.travelStatNum {
+  font-weight: 700;
+  color: var(--os-accent);
+}
+
+.travelStatSep {
+  color: var(--os-muted);
+}
+
+.travelGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 4px 8px;
+}
+
+.travelCell {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 4px;
+  background: transparent;
+  border: 0;
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+  font-size: 12px;
+  color: var(--os-ink);
+  cursor: default;
+  text-align: left;
+}
+
+.travelCell:hover {
+  background: var(--os-chrome);
+}
+
+.travelCellLabel {
+  flex: 1 1 auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---------- Photography ---------- */
+
+.photoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 6px;
+}
+
+.photoThumb {
+  position: relative;
+  aspect-ratio: 1;
+  border: 1px solid var(--os-border);
+  overflow: hidden;
+  margin: 0;
+}
+
+.photoThumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photoThumbCaption {
+  position: absolute;
+  inset: auto 0 0 0;
+  background: rgba(0, 0, 0, 0.78);
+  color: #fff;
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+  font-size: 10px;
+  padding: 2px 6px;
+  opacity: 0;
+  transition: opacity 120ms;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.photoThumb:hover .photoThumbCaption {
+  opacity: 1;
+}
+
+/* ---------- NowPlaying ---------- */
+
+.mediaPlayer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+  font-size: 12px;
+  color: var(--os-ink);
+}
+
+.mediaWaveform {
+  display: block;
+  width: 100%;
+  height: 32px;
+  background: var(--os-window-bg);
+  border: 1px solid var(--os-border);
+  color: var(--os-accent);
+}
+
+.mediaNowLine {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--os-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mediaNowText {
+  flex: 1 1 auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mediaNowDot {
+  width: 7px;
+  height: 7px;
+  background: var(--os-accent);
+  display: inline-block;
+  flex: 0 0 7px;
+  animation: osPulse 1.6s ease-in-out infinite;
+}
+
+.mediaNowDotIdle {
+  width: 7px;
+  height: 7px;
+  background: var(--os-muted);
+  display: inline-block;
+  flex: 0 0 7px;
+}
+
+.mediaControls {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  padding: 6px 0;
+  color: var(--os-muted);
+}
+
+.mediaControlButton {
+  background: transparent;
+  border: 0;
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+  font-size: 14px;
+  color: var(--os-ink);
+  cursor: default;
+  padding: 0;
+}
+
+.mediaControlButton:hover {
+  color: var(--os-accent);
+}
+
+.mediaListLabel {
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--os-muted);
+  border-top: 1px dashed var(--os-border);
+  padding-top: 6px;
+}
+
+.mediaList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mediaListEmpty {
+  color: var(--os-muted);
+}
+
+.mediaListLink {
+  color: var(--os-ink);
+  text-decoration: none;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mediaListLink:hover {
+  color: var(--os-accent);
+}
+
+.mediaListArtist {
+  color: var(--os-muted);
+}
+
+/* ---------- Play (Lane Defense) ---------- */
+
+.playWindow {
+  /* Provide local CSS variables that the bento Tile/inner uses, so the
+     game renders sensibly inside the OS palette. */
+  --color-fg: var(--os-ink);
+  --color-fg-muted: var(--os-muted);
+  --color-bg: var(--os-window-bg);
+  --color-bg-2: var(--os-desktop);
+  --color-border: var(--os-border);
+  --color-accent-primary: var(--os-accent);
+  --tile-accent: var(--os-accent);
+  --color-tile: var(--os-window-bg);
+  --color-tile-hover: var(--os-chrome);
+  font-size: 13px;
+}
+
+/* ---------- Contact ---------- */
+
+.contactList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.contactLinkWrap {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ---------- Secrets ---------- */
+
+.secrets {
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+  font-size: 13px;
+  color: var(--os-ink);
+}
+
+.secretBlock {
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed var(--os-border);
+}
+
+.secretHeading {
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--os-muted);
+  margin: 0 0 4px 0;
+  font-weight: 600;
+}
+
+.secretLine {
+  margin: 0;
+}
+
+.secretMono {
+  color: var(--os-accent);
+  font-weight: 700;
+}
+
+.secretList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.secretDay {
+  display: inline-block;
+  min-width: 96px;
+  color: var(--os-muted);
+}
+
+.secretFootnote {
+  font-size: 11px;
+  color: var(--os-muted);
+  font-style: italic;
+  margin: 0;
+}
+
+/* ---------- Sidebar Phase 3 additions ---------- */
+
+.sidebarStatus {
+  margin-top: auto;
+  padding: 10px 14px;
+  border-top: 1px solid var(--os-border);
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+  font-size: 10px;
+  color: var(--os-muted);
+  line-height: 1.5;
+}
+
+.sidebarStatusKey {
+  color: var(--os-muted);
+}
+
+.sidebarStatusVal {
+  color: var(--os-ink);
+}
+
+/* ---------- Empty states ---------- */
+
+.windowEmpty {
+  margin: 0;
+  color: var(--os-muted);
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+  font-size: 13px;
+}
+
+/* ---------- Konami chess wallpaper ---------- */
+
+.konamiWallpaper {
+  background-image:
+    linear-gradient(45deg, rgba(0, 0, 0, 0.06) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(0, 0, 0, 0.06) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(0, 0, 0, 0.06) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(0, 0, 0, 0.06) 75%);
+  background-size: 64px 64px;
+  background-position: 0 0, 0 32px, 32px -32px, -32px 0;
+  transition: background-color 200ms;
+}
