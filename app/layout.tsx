@@ -52,7 +52,7 @@ export const viewport: Viewport = {
 const themeInitScript = `
 (function () {
   try {
-    var allowed = ['light', 'dark', 'terminal', 'posthog'];
+    var allowed = ['light', 'dark', 'terminal'];
     var stored = localStorage.getItem('theme');
     var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     var theme = allowed.indexOf(stored) >= 0 ? stored : (prefersDark ? 'dark' : 'light');

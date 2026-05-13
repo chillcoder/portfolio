@@ -51,21 +51,6 @@
   --font-sans: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
 }
 
-/* PostHog theme — brand palette */
-:root[data-theme="posthog"] {
-  --color-bg: #eeefe9;
-  --color-bg-2: #ffffff;
-  --color-fg: #151515;
-  --color-fg-muted: #4b4b4b;
-  --color-border: rgba(21, 21, 21, 0.1);
-  --color-tile: rgba(255, 255, 255, 0.78);
-  --color-tile-hover: rgba(255, 255, 255, 0.95);
-
-  --color-accent-primary: #f54e00;
-  --color-accent-secondary: #1d4aff;
-  --color-accent-tertiary: #00b9a7;
-}
-
 @layer base {
   html,
   body {
@@ -88,13 +73,6 @@
     background-image:
       radial-gradient(at 50% 0%, rgba(51, 255, 102, 0.06), transparent 60%),
       radial-gradient(at 50% 100%, rgba(51, 255, 102, 0.04), transparent 70%);
-  }
-
-  :root[data-theme="posthog"] body {
-    background-image:
-      radial-gradient(at 12% 8%, rgba(245, 78, 0, 0.1), transparent 55%),
-      radial-gradient(at 88% 12%, rgba(29, 74, 255, 0.08), transparent 50%),
-      radial-gradient(at 50% 92%, rgba(0, 185, 167, 0.07), transparent 60%);
   }
 
   ::selection {

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-type Theme = "light" | "dark" | "terminal" | "posthog";
+type Theme = "light" | "dark" | "terminal";
 
 const THEMES: ReadonlyArray<{
   id: Theme;
@@ -28,16 +28,10 @@ const THEMES: ReadonlyArray<{
     glyph: ">_",
     swatch: { bg: "#050805", fg: "#b8ffc6", accent: "#33ff66" },
   },
-  {
-    id: "posthog",
-    label: "PostHog",
-    glyph: "◆",
-    swatch: { bg: "#eeefe9", fg: "#151515", accent: "#f54e00" },
-  },
 ];
 
 function isTheme(value: string | null): value is Theme {
-  return value === "light" || value === "dark" || value === "terminal" || value === "posthog";
+  return value === "light" || value === "dark" || value === "terminal";
 }
 
 export function ThemeToggle() {

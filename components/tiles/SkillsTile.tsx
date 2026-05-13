@@ -162,8 +162,7 @@ function PhysicsField({ skills }: { skills: readonly string[] }) {
         const fg = styles.getPropertyValue("--color-fg").trim();
         const accent = styles.getPropertyValue("--color-accent-primary").trim();
         const isDarkBg =
-          (document.documentElement.getAttribute("data-theme") ?? "light") !== "light" &&
-          document.documentElement.getAttribute("data-theme") !== "posthog";
+          (document.documentElement.getAttribute("data-theme") ?? "light") !== "light";
         if (fg) palette.fg = fg;
         if (accent) palette.stroke = `color-mix(in oklab, ${accent} 55%, transparent)`;
         palette.fill = isDarkBg ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.55)";
