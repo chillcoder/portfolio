@@ -43,7 +43,34 @@
   position: relative;
   width: 100%;
   height: 100%;
+  display: flex;
+  flex-direction: column;
   isolation: isolate;
+}
+
+.desktopBody {
+  position: relative;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: row;
+  min-height: 0;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.desktopSurface {
+  position: relative;
+  flex: 1 1 auto;
+  overflow: hidden;
+  min-width: 0;
+  /* Loose 8px grid for sample DesktopIcons. Phase 3 may switch to free placement. */
+  padding: 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 64px);
+  grid-auto-rows: 80px;
+  gap: 8px;
+  align-content: start;
+  justify-content: start;
 }
 
 /* ~3% noise wash. The SVG fractalNoise filter mirrors the bento `.noise`
@@ -89,10 +116,9 @@
 }
 
 .taskbar {
-  position: absolute;
-  inset-inline: 0;
-  bottom: 0;
+  position: relative;
   z-index: 2;
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -165,4 +191,268 @@
   .onlineDot {
     animation: none;
   }
+}
+
+/* ---------- Sidebar ---------- */
+
+.sidebar {
+  flex: 0 0 240px;
+  width: 240px;
+  display: flex;
+  flex-direction: column;
+  background: var(--os-window-bg);
+  border-right: 1px solid var(--os-border);
+  overflow-y: auto;
+  user-select: none;
+}
+
+.sidebarHeader {
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid var(--os-border);
+}
+
+.sidebarBrand {
+  font-family: var(--font-pixelify), system-ui;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.06em;
+  color: var(--os-ink);
+}
+
+.sidebarMeta {
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--os-muted);
+  letter-spacing: 0.02em;
+}
+
+.sidebarTree {
+  padding: 6px 4px 12px;
+  font-size: 13px;
+}
+
+.sidebarFolder {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 4px 8px;
+  background: transparent;
+  border: 0;
+  color: var(--os-ink);
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+  font-size: 13px;
+  text-align: left;
+  cursor: default;
+}
+
+.sidebarFolder:hover {
+  background: var(--os-chrome);
+}
+
+.sidebarFolderActive,
+.sidebarFolderActive:hover {
+  background: var(--os-accent);
+  color: #fff;
+}
+
+.sidebarChevron {
+  width: 10px;
+  display: inline-block;
+  text-align: center;
+  font-size: 10px;
+  color: var(--os-muted);
+}
+
+.sidebarFolderActive .sidebarChevron {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.sidebarFolderIcon {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+}
+
+.sidebarFolderLabel {
+  flex: 1 1 auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    display: none;
+  }
+}
+
+/* ---------- Window ---------- */
+
+.window {
+  background: var(--os-window-bg);
+  border: 1px solid var(--os-border);
+  box-shadow: var(--os-shadow);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.windowTitleBar {
+  display: flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 6px 0 10px;
+  background: var(--os-chrome);
+  color: var(--os-ink);
+  border-bottom: 1px solid var(--os-border);
+  font-family: var(--font-pixelify), system-ui;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  user-select: none;
+  flex: 0 0 auto;
+}
+
+.windowTitleBarActive {
+  background: var(--os-chrome-active);
+  color: #fff;
+  border-bottom-color: var(--os-border);
+}
+
+.windowTitleIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+}
+
+.windowTitle {
+  flex: 1 1 auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.windowControls {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 auto;
+}
+
+.windowButton {
+  width: 16px;
+  height: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  border: 1px solid var(--os-border);
+  color: var(--os-ink);
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+  font-size: 10px;
+  line-height: 1;
+  padding: 0;
+  cursor: default;
+}
+
+.windowButton:hover {
+  background: var(--os-chrome);
+}
+
+.windowContent {
+  flex: 1 1 auto;
+  padding: 16px;
+  overflow: auto;
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--os-ink);
+}
+
+/* ---------- DesktopIcon ---------- */
+
+.desktopIcon {
+  width: 64px;
+  height: 80px;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: 1px dashed transparent;
+  cursor: default;
+}
+
+.desktopIconArt {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.desktopIcon:hover .desktopIconArt {
+  outline: 1px solid var(--os-border);
+  outline-offset: 2px;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.desktopIconLabel {
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+  font-size: 12px;
+  line-height: 1.15;
+  text-align: center;
+  color: #ffffff;
+  -webkit-text-stroke: 1px var(--os-ink);
+  paint-order: stroke fill;
+  text-shadow:
+    1px 1px 0 var(--os-ink),
+    -1px -1px 0 var(--os-ink),
+    1px -1px 0 var(--os-ink),
+    -1px 1px 0 var(--os-ink);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+
+.desktopIcon:focus-visible,
+.desktopIconActive {
+  outline: none;
+  border-color: var(--os-ink);
+  border-style: dotted;
+}
+
+/* ---------- FileIcon ---------- */
+
+.fileIcon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 4px;
+  background: transparent;
+  border: 0;
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+  font-size: 13px;
+  color: var(--os-ink);
+  cursor: default;
+  text-align: left;
+}
+
+.fileIcon:hover {
+  background: var(--os-chrome);
+}
+
+.fileIconArt {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
