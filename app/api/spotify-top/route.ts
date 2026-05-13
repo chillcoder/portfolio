@@ -1,9 +1,14 @@
 import { NextResponse } from "next/server";
 import { getSpotifyAccessToken } from "@/lib/spotify";
+import { getRedis } from "@/lib/redis";
 import { isSpotifyMusicTrack } from "@/lib/spotifyMusic";
 import { captureServerEvent, getDistinctIdFromHeaders } from "@/lib/posthogServer";
 
 export const dynamic = "force-dynamic";
+
+/** KV cache for last good top response — cuts Spotify Web API traffic (avoids 429 on reloads). */
+const TOP_CACHE_KEY = "spotify_top_bento_cache";
+const TOP_CACHE_TTL_SEC = 30 * 60;
 
 interface TopArtist {
   name: string;
@@ -30,7 +35,26 @@ export interface SpotifyTopResponse {
 
 export async function GET(req: Request) {
   const distinctId = getDistinctIdFromHeaders(req.headers);
+  const redis = getRedis();
+
   try {
+    if (redis) {
+      try {
+        const cached = await redis.get<string>(TOP_CACHE_KEY);
+        if (cached) {
+          const parsed = JSON.parse(cached) as SpotifyTopResponse;
+          return NextResponse.json(parsed, {
+            headers: {
+              "X-Spotify-Top": "kv-cache-hit",
+              "Cache-Control": "private, s-maxage=120, stale-while-revalidate=600",
+            },
+          });
+        }
+      } catch {
+        /* bad cache — refetch */
+      }
+    }
+
     const token = await getSpotifyAccessToken();
     if (!token) {
       captureServerEvent("spotify_top_error", { reason: "no_token" }, distinctId);
@@ -111,19 +135,44 @@ export async function GET(req: Request) {
       else trendsIssue = "empty";
     }
 
-    return NextResponse.json(
-      {
-        topArtists,
-        topTracks,
-        trendsIssue,
-        spotifyHttp: { artists: artistsRes.status, tracks: tracksRes.status },
-      } satisfies SpotifyTopResponse,
-      {
-        headers: {
-          "X-Spotify-Top": `ok artists=${artistsRes.status}/${topArtists.length} tracks=${tracksRes.status}/${topTracks.length}${trendsIssue ? ` issue=${trendsIssue}` : ""}`,
-        },
+    const rateLimited = artistsRes.status === 429 || tracksRes.status === 429;
+    if (rateLimited && redis) {
+      try {
+        const staleRaw = await redis.get<string>(TOP_CACHE_KEY);
+        if (staleRaw) {
+          const stale = JSON.parse(staleRaw) as SpotifyTopResponse;
+          return NextResponse.json(stale, {
+            headers: {
+              "X-Spotify-Top": "stale-after-429",
+              "Cache-Control": "private, max-age=60",
+            },
+          });
+        }
+      } catch {
+        /* fall through */
+      }
+    }
+
+    const payload: SpotifyTopResponse = {
+      topArtists,
+      topTracks,
+      trendsIssue,
+      spotifyHttp: { artists: artistsRes.status, tracks: tracksRes.status },
+    };
+
+    if (redis && artistsRes.ok && tracksRes.ok) {
+      try {
+        await redis.set(TOP_CACHE_KEY, JSON.stringify(payload), { ex: TOP_CACHE_TTL_SEC });
+      } catch {
+        /* non-fatal */
+      }
+    }
+
+    return NextResponse.json(payload, {
+      headers: {
+        "X-Spotify-Top": `ok artists=${artistsRes.status}/${topArtists.length} tracks=${tracksRes.status}/${topTracks.length}${trendsIssue ? ` issue=${trendsIssue}` : ""}`,
       },
-    );
+    });
   } catch (error) {
     const reason = error instanceof Error ? error.message : "unknown";
     captureServerEvent("spotify_top_error", { reason }, distinctId);
