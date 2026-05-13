@@ -10,6 +10,8 @@ interface WindowProps {
   children: ReactNode;
   /** Size + position overrides; e.g. Tailwind `absolute left-1/2 top-1/2 ...`. */
   className?: string;
+  /** When provided, the × control closes the window. */
+  onClose?: () => void;
 }
 
 export function Window({
@@ -18,6 +20,7 @@ export function Window({
   active = false,
   children,
   className,
+  onClose,
 }: WindowProps) {
   const titleBarClass = active
     ? `${styles.windowTitleBar} ${styles.windowTitleBarActive}`
@@ -54,6 +57,7 @@ export function Window({
             type="button"
             className={styles.windowButton}
             aria-label="Close"
+            onClick={onClose}
           >
             ×
           </button>

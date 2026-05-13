@@ -2,7 +2,14 @@
 
 import styles from "@/app/os/os.module.css";
 
-export type FileExtension = ".md" | ".txt" | ".app" | ".exe" | ".jpg";
+export type FileExtension =
+  | ".md"
+  | ".txt"
+  | ".app"
+  | ".exe"
+  | ".jpg"
+  | ".url"
+  | ".archive";
 
 interface FileIconProps {
   label: string;
@@ -10,11 +17,17 @@ interface FileIconProps {
   onClick?: () => void;
 }
 
-function ExtensionGlyph({ extension }: { extension: FileExtension }) {
+export function ExtensionGlyph({
+  extension,
+  size = 16,
+}: {
+  extension: FileExtension;
+  size?: number;
+}) {
   const stroke = "#1a1a1a";
   const common = {
-    width: 16,
-    height: 16,
+    width: size,
+    height: size,
     viewBox: "0 0 16 16",
     fill: "none",
     stroke,
@@ -59,6 +72,25 @@ function ExtensionGlyph({ extension }: { extension: FileExtension }) {
           <rect x={1.5} y={2.5} width={13} height={11} />
           <circle cx={5} cy={6} r={1.25} />
           <path d="M1.5 11 L5.5 8 L9 10.5 L11.5 9 L14.5 11.5" />
+        </svg>
+      );
+    case ".url":
+      // Globe: circle w/ horizon + meridian.
+      return (
+        <svg {...common} aria-hidden>
+          <circle cx={8} cy={8} r={6.5} />
+          <path d="M1.5 8 L14.5 8" />
+          <path d="M8 1.5 Q4.5 4 4.5 8 Q4.5 12 8 14.5" />
+          <path d="M8 1.5 Q11.5 4 11.5 8 Q11.5 12 8 14.5" />
+        </svg>
+      );
+    case ".archive":
+      // Box with lid line + tape.
+      return (
+        <svg {...common} aria-hidden>
+          <rect x={1.5} y={4} width={13} height={10} />
+          <path d="M1.5 7 L14.5 7" />
+          <path d="M6 4 L6 14 M10 4 L10 14" strokeWidth={0.75} />
         </svg>
       );
   }

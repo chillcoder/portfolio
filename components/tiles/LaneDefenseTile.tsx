@@ -100,7 +100,14 @@ function countTowerTypes(state: GameState): Record<TowerTypeId, number> {
   return c;
 }
 
-export function LaneDefenseTile({ span }: { span?: string }) {
+export function LaneDefenseTile({
+  span,
+  chromeless = false,
+}: {
+  span?: string;
+  /** When true, render bare (no Tile chrome). Used by the /os route's PlayWindow. */
+  chromeless?: boolean;
+}) {
   const reduced = useReducedMotion();
   const stateRef = useRef<GameState>(createInitialState());
   const [expanded, setExpanded] = useState(false);
@@ -145,6 +152,12 @@ export function LaneDefenseTile({ span }: { span?: string }) {
   useEffect(() => {
     setBestQuarter(readBestQuarter());
   }, []);
+
+  // /os PlayWindow renders the game inside a Window already; the bento
+  // collapse/expand metaphor doesn't apply there, so force the body open.
+  useEffect(() => {
+    if (chromeless && !expanded) setExpanded(true);
+  }, [chromeless, expanded]);
 
   const showToast = useCallback((msg: string) => {
     if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
@@ -367,50 +380,20 @@ export function LaneDefenseTile({ span }: { span?: string }) {
   const loseCopy =
     state.churnArrDisplay ? `Account churned. -${state.churnArrDisplay} ARR.` : "Account churned.";
 
-  return (
-    <Tile
-      span={span}
-      accent="primary"
-      eyebrow="Play"
-      title={
-        <span className="block">
-          <span
-            className="inline-block"
-            onMouseEnter={() => {
-              titleHoverTimer.current = setTimeout(() => setSubtitleEaster(true), 3000);
-            }}
-            onMouseLeave={() => {
-              if (titleHoverTimer.current) clearTimeout(titleHoverTimer.current);
-              titleHoverTimer.current = null;
-              setSubtitleEaster(false);
-            }}
-          >
-            Renewal defense
-          </span>
-          <span className="mt-1 block text-xs font-normal font-mono text-[var(--color-fg-muted)]">
-            {subtitleEaster ?
-              "Built in Cursor between QBRs."
-            : "Defend the account. Ten quarters to renewal."}
-          </span>
-          <span className="mt-1 block text-[10px] font-mono text-[var(--color-fg-muted)]/85">WIP</span>
-        </span>
-      }
-      action={collapseToggle}
-      className="min-h-0"
-    >
-      <div ref={themeHostRef} className="relative flex flex-col gap-3 font-[family-name:var(--font-sans)]">
-        {!expanded && (
-          <p className="text-sm text-[var(--color-fg-muted)]">
-            One lane, four motions—defend the account through ten quarters. Best quarter cleared{" "}
-            <span className="font-mono text-[var(--color-fg)]">{bestQuarter}</span>.
-          </p>
-        )}
+  const body = (
+    <div ref={themeHostRef} className="relative flex flex-col gap-3 font-[family-name:var(--font-sans)]">
+      {!chromeless && !expanded && (
+        <p className="text-sm text-[var(--color-fg-muted)]">
+          One lane, four motions—defend the account through ten quarters. Best quarter cleared{" "}
+          <span className="font-mono text-[var(--color-fg)]">{bestQuarter}</span>.
+        </p>
+      )}
 
-        {(!expanded || userPaused) && (
-          <p className="text-[11px] leading-snug text-[var(--color-fg-muted)]">
-            10 quarter side quest
-          </p>
-        )}
+      {!chromeless && (!expanded || userPaused) && (
+        <p className="text-[11px] leading-snug text-[var(--color-fg-muted)]">
+          10 quarter side quest
+        </p>
+      )}
 
         {toast && (
           <div
@@ -588,6 +571,42 @@ export function LaneDefenseTile({ span }: { span?: string }) {
           </div>
         )}
       </div>
+  );
+
+  if (chromeless) return body;
+
+  return (
+    <Tile
+      span={span}
+      accent="primary"
+      eyebrow="Play"
+      title={
+        <span className="block">
+          <span
+            className="inline-block"
+            onMouseEnter={() => {
+              titleHoverTimer.current = setTimeout(() => setSubtitleEaster(true), 3000);
+            }}
+            onMouseLeave={() => {
+              if (titleHoverTimer.current) clearTimeout(titleHoverTimer.current);
+              titleHoverTimer.current = null;
+              setSubtitleEaster(false);
+            }}
+          >
+            Renewal defense
+          </span>
+          <span className="mt-1 block text-xs font-normal font-mono text-[var(--color-fg-muted)]">
+            {subtitleEaster ?
+              "Built in Cursor between QBRs."
+            : "Defend the account. Ten quarters to renewal."}
+          </span>
+          <span className="mt-1 block text-[10px] font-mono text-[var(--color-fg-muted)]/85">WIP</span>
+        </span>
+      }
+      action={collapseToggle}
+      className="min-h-0"
+    >
+      {body}
     </Tile>
   );
 }

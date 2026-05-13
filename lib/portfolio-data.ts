@@ -213,6 +213,8 @@ export interface Project {
   /** When set, shown on the badge instead of the default label for `status`. */
   statusLabel?: string;
   tags: string[];
+  /** Optional kebab-case slug for filename-style displays in /os. Auto-derived from name if absent. */
+  slug?: string;
 }
 
 export const PROJECTS: Project[] = [
@@ -239,6 +241,7 @@ export const PROJECTS: Project[] = [
     href: "https://www.linkedin.com/in/lucas-obrien",
     status: "wip",
     tags: ["claude code", "internal tools", "cs"],
+    slug: "applied-ai-tooling",
   },
   {
     name: "E-ink commuter dashboard",
@@ -247,6 +250,7 @@ export const PROJECTS: Project[] = [
     href: "https://github.com/chillcoder",
     status: "wip",
     tags: ["esp32", "python", "e-ink"],
+    slug: "e-ink-display",
   },
   {
     name: "PromptOps",
@@ -262,8 +266,82 @@ export const PROJECTS: Project[] = [
     href: "https://github.com/chillcoder",
     status: "archived",
     tags: ["python", "sql"],
+    slug: "pipeline-utilities",
   },
 ];
+
+/**
+ * Project helpers used by the /os route. Pure derivations, no schema change.
+ */
+export function projectSlug(p: Project): string {
+  if (p.slug) return p.slug;
+  return p.name
+    .toLowerCase()
+    .replace(/['']/g, "")
+    .replace(/[^a-z0-9.]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+export function projectExtension(p: Project): ".app" | ".archive" {
+  return p.status === "archived" ? ".archive" : ".app";
+}
+
+export function projectDisplayStatus(
+  p: Project,
+): "LIVE" | "BUILDING" | "ARCHIVE" {
+  if (p.status === "live") return "LIVE";
+  if (p.status === "wip") return "BUILDING";
+  return "ARCHIVE";
+}
+
+/**
+ * Career log derived from WORK for the /os `career.log` view.
+ * One entry per role start, reverse chronological.
+ */
+export interface CareerLogEntry {
+  /** YYYY-MM */
+  date: string;
+  event: "STARTED";
+  role: string;
+  company: string;
+}
+
+const MONTHS: Record<string, string> = {
+  Jan: "01", Feb: "02", Mar: "03", Apr: "04", May: "05", Jun: "06",
+  Jul: "07", Aug: "08", Sep: "09", Oct: "10", Nov: "11", Dec: "12",
+};
+
+function startStringToYM(start: string): string {
+  const [mo, yr] = start.split(" ");
+  const mm = MONTHS[mo] ?? "??";
+  return yr ? `${yr}-${mm}` : "??-??";
+}
+
+export function careerLog(): CareerLogEntry[] {
+  return WORK.map((w) => ({
+    date: startStringToYM(w.start),
+    event: "STARTED" as const,
+    role: w.role,
+    company: w.company,
+  })).sort((a, b) => b.date.localeCompare(a.date));
+}
+
+/**
+ * /os easter-egg "secrets/" content. Not surfaced anywhere in the bento route.
+ */
+export interface PickupEvent {
+  day: string;
+  activity: string;
+}
+
+export const SECRETS = {
+  chess: { format: "Rapid", rating: 1080 },
+  pickup: [
+    { day: "Tuesday", activity: "Basketball pickup, SF JCC" },
+    { day: "Wednesday", activity: "Softball" },
+    { day: "Thursday", activity: "HH" },
+  ] as PickupEvent[],
+} as const;
 
 /**
  * Registry of runtime-fetched content. Each entry names the API endpoint
