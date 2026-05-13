@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { track } from "@/lib/track";
 
 type Theme = "light" | "dark" | "terminal";
 
@@ -126,6 +128,37 @@ export function ThemeToggle() {
               </button>
             );
           })}
+
+          <div
+            aria-hidden
+            className="my-1 h-px bg-[var(--color-border)]"
+          />
+
+          <Link
+            role="menuitem"
+            href="/os"
+            onClick={() => {
+              track("view_switched", { to: "os" });
+              setOpen(false);
+            }}
+            className="flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left text-sm text-[var(--color-fg)] transition hover:bg-[var(--color-tile-hover)]"
+          >
+            <span
+              aria-hidden
+              className="grid size-6 shrink-0 place-items-center rounded-md border border-[var(--color-border)] font-mono text-[10px]"
+              style={{
+                background: "#e8e1cc",
+                color: "#1a1a1a",
+                boxShadow: "inset 0 0 0 2px rgba(255, 90, 31, 0.25)",
+              }}
+            >
+              ▣
+            </span>
+            <span className="flex-1">Lucas-OS</span>
+            <span aria-hidden className="text-xs text-[var(--color-fg-muted)]">
+              →
+            </span>
+          </Link>
         </div>
       )}
     </div>

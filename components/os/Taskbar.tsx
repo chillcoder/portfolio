@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import styles from "@/app/os/os.module.css";
+import { track } from "@/lib/track";
 
 function formatTime(d: Date): string {
   const pad = (n: number) => n.toString().padStart(2, "0");
@@ -19,7 +21,14 @@ export function Taskbar() {
 
   return (
     <div className={styles.taskbar} role="contentinfo" aria-label="Taskbar">
-      <span className={styles.taskbarBrand}>LUCAS-OS</span>
+      <Link
+        href="/"
+        className={styles.taskbarBrand}
+        aria-label="Exit Lucas-OS, return to bento dashboard"
+        onClick={() => track("view_switched", { to: "bento" })}
+      >
+        LUCAS-OS
+      </Link>
       <div className={styles.taskbarRight}>
         <span className={styles.onlineGroup}>
           <span aria-hidden className={styles.onlineDot} />
