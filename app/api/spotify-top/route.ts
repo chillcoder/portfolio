@@ -3,7 +3,7 @@ import { getSpotifyAccessToken } from "@/lib/spotify";
 import { isSpotifyMusicTrack } from "@/lib/spotifyMusic";
 import { captureServerEvent, getDistinctIdFromHeaders } from "@/lib/posthogServer";
 
-export const revalidate = 3600;
+export const dynamic = "force-dynamic";
 
 interface TopArtist {
   name: string;
@@ -43,14 +43,14 @@ export async function GET(req: Request) {
     }
 
     const [artistsRes, tracksRes] = await Promise.all([
-      fetch(
-        "https://api.spotify.com/v1/me/top/artists?limit=5&time_range=short_term",
-        { headers: { Authorization: `Bearer ${token}` }, next: { revalidate: 3600 } },
-      ),
-      fetch(
-        "https://api.spotify.com/v1/me/top/tracks?limit=5&time_range=short_term",
-        { headers: { Authorization: `Bearer ${token}` }, next: { revalidate: 3600 } },
-      ),
+      fetch("https://api.spotify.com/v1/me/top/artists?limit=5&time_range=short_term", {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      }),
+      fetch("https://api.spotify.com/v1/me/top/tracks?limit=5&time_range=short_term", {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      }),
     ]);
 
     if (!artistsRes.ok || !tracksRes.ok) {
