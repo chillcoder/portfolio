@@ -24,6 +24,8 @@ export interface SpotifyTopResponse {
   topTracks: TopTrack[];
   /** Present when both lists are empty; helps distinguish missing scope vs no listening data. */
   trendsIssue?: SpotifyTrendsIssue;
+  /** Spotify Web API HTTP status for each top request (debugging). */
+  spotifyHttp?: { artists: number; tracks: number };
 }
 
 export async function GET(req: Request) {
@@ -110,7 +112,12 @@ export async function GET(req: Request) {
     }
 
     return NextResponse.json(
-      { topArtists, topTracks, trendsIssue } satisfies SpotifyTopResponse,
+      {
+        topArtists,
+        topTracks,
+        trendsIssue,
+        spotifyHttp: { artists: artistsRes.status, tracks: tracksRes.status },
+      } satisfies SpotifyTopResponse,
       {
         headers: {
           "X-Spotify-Top": `ok artists=${artistsRes.status}/${topArtists.length} tracks=${tracksRes.status}/${topTracks.length}${trendsIssue ? ` issue=${trendsIssue}` : ""}`,

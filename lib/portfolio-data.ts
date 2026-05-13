@@ -372,6 +372,7 @@ export interface SpotifyTopPayload {
     url: string;
   }[];
   trendsIssue?: SpotifyTrendsIssue;
+  spotifyHttp?: { artists: number; tracks: number };
 }
 
 export interface PhotosPayload {

@@ -41,7 +41,7 @@ export function NowPlayingWindow() {
     { cacheKey: "os_spotify_now", ttl: 60_000, intervalMs: 60_000 },
   );
   const { data: top } = useCachedFetch<SpotifyTopPayload>("/api/spotify-top", {
-    cacheKey: "os_spotify_top_v2",
+    cacheKey: "os_spotify_top_v3",
     ttl: 60 * 60 * 1000,
   });
 
@@ -100,7 +100,7 @@ export function NowPlayingWindow() {
         {top ? (
           tracks.length === 0 ? (
             <p className={styles.mediaEmpty}>
-              {spotifyTrendsEmptyMessage(top.trendsIssue)}
+              {spotifyTrendsEmptyMessage(top.trendsIssue, top.spotifyHttp)}
             </p>
           ) : (
             <ul className={styles.mediaList}>
@@ -130,7 +130,7 @@ export function NowPlayingWindow() {
         {top ? (
           artists.length === 0 ? (
             <p className={styles.mediaEmpty}>
-              {spotifyTrendsEmptyMessage(top.trendsIssue)}
+              {spotifyTrendsEmptyMessage(top.trendsIssue, top.spotifyHttp)}
             </p>
           ) : (
             <ul className={styles.mediaArtistRow}>

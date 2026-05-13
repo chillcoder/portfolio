@@ -23,7 +23,7 @@ export function SpotifyTile({ span }: { span?: string }) {
     { cacheKey: "spotify_now", ttl: 60 * 1000, intervalMs: 60 * 1000 },
   );
   const { data: top } = useCachedFetch<SpotifyTopPayload>("/api/spotify-top", {
-    cacheKey: "spotify_top_v2",
+    cacheKey: "spotify_top_v3",
     ttl: 60 * 60 * 1000,
   });
 
@@ -99,7 +99,7 @@ export function SpotifyTile({ span }: { span?: string }) {
             {top ? (
               top.topTracks.length === 0 ? (
                 <p className="text-xs text-[var(--color-fg-muted)]">
-                  {spotifyTrendsEmptyMessage(top.trendsIssue)}
+                  {spotifyTrendsEmptyMessage(top.trendsIssue, top.spotifyHttp)}
                 </p>
               ) : (
                 <ul className="flex gap-2 overflow-x-auto pb-1">
@@ -156,7 +156,7 @@ export function SpotifyTile({ span }: { span?: string }) {
             {top ? (
               top.topArtists.length === 0 ? (
                 <p className="text-xs text-[var(--color-fg-muted)]">
-                  {spotifyTrendsEmptyMessage(top.trendsIssue)}
+                  {spotifyTrendsEmptyMessage(top.trendsIssue, top.spotifyHttp)}
                 </p>
               ) : (
                 <ul className="flex gap-2 overflow-x-auto pb-1">
