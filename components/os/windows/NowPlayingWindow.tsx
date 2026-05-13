@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useCachedFetch } from "@/hooks/useCachedFetch";
 import type {
   SpotifyNowPayload,
@@ -43,47 +44,122 @@ export function NowPlayingWindow() {
     ttl: 60 * 60 * 1000,
   });
 
-  const songLine = now?.song
-    ? `${now.song} — ${now.artist ?? "—"}`
-    : "Nothing playing";
-
-  const tracks = (top?.topTracks ?? []).slice(0, 5);
+  const tracks = (top?.topTracks ?? []).slice(0, 4);
+  const artists = (top?.topArtists ?? []).slice(0, 4);
 
   return (
     <div className={styles.mediaPlayer}>
       <Waveform />
-      <div className={styles.mediaNowLine}>
-        <span
-          className={now?.isPlaying ? styles.mediaNowDot : styles.mediaNowDotIdle}
-          aria-hidden
-        />
-        <span className={styles.mediaNowText}>{songLine}</span>
+
+      <div className={styles.mediaNowBlock}>
+        <span className={styles.mediaSectionLabel}>Now playing</span>
+        {now?.song ? (
+          <a
+            href={now.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.mediaNowLink}
+          >
+            <span
+              className={now.isPlaying ? styles.mediaNowDot : styles.mediaNowDotIdle}
+              aria-hidden
+            />
+            {now.albumImage ? (
+              <Image
+                src={now.albumImage}
+                alt=""
+                width={32}
+                height={32}
+                className={styles.mediaNowArt}
+                unoptimized
+              />
+            ) : (
+              <span className={styles.mediaNowArtFallback} aria-hidden />
+            )}
+            <span className={styles.mediaNowMeta}>
+              <span className={styles.mediaNowTitle}>{now.song}</span>
+              <span className={styles.mediaNowArtist}>{now.artist}</span>
+            </span>
+          </a>
+        ) : (
+          <span className={styles.mediaNowText}>nothing playing</span>
+        )}
       </div>
+
       <div className={styles.mediaControls} role="group" aria-label="Playback controls">
         <button type="button" className={styles.mediaControlButton} aria-label="Previous">◁◁</button>
         <button type="button" className={styles.mediaControlButton} aria-label="Play">▷</button>
         <button type="button" className={styles.mediaControlButton} aria-label="Next">▷▷</button>
       </div>
-      <div className={styles.mediaListLabel}>Top tracks</div>
-      <ol className={styles.mediaList}>
-        {tracks.length === 0 ? (
-          <li className={styles.mediaListEmpty}>—</li>
+
+      <section>
+        <span className={styles.mediaSectionLabel}>
+          Songs I&apos;ve been into lately
+        </span>
+        {top ? (
+          tracks.length === 0 ? (
+            <p className={styles.mediaEmpty}>Spotify trends unavailable.</p>
+          ) : (
+            <ul className={styles.mediaList}>
+              {tracks.map((t, i) => (
+                <li key={`${t.name}-${i}`}>
+                  <a
+                    href={t.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.mediaListLink}
+                    title={`${t.name} — ${t.artist}`}
+                  >
+                    {String(i + 1).padStart(2, "0")} {t.name}
+                    <span className={styles.mediaListArtist}> — {t.artist}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )
         ) : (
-          tracks.map((t, i) => (
-            <li key={`${t.name}-${i}`}>
-              <a
-                href={t.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.mediaListLink}
-              >
-                {String(i + 1).padStart(2, "0")} {t.name}
-                <span className={styles.mediaListArtist}> — {t.artist}</span>
-              </a>
-            </li>
-          ))
+          <p className={styles.mediaEmpty}>Loading…</p>
         )}
-      </ol>
+      </section>
+
+      <section>
+        <span className={styles.mediaSectionLabel}>Recent artists</span>
+        {top ? (
+          artists.length === 0 ? (
+            <p className={styles.mediaEmpty}>Spotify trends unavailable.</p>
+          ) : (
+            <ul className={styles.mediaArtistRow}>
+              {artists.map((a, i) => (
+                <li key={`${a.name}-${i}`}>
+                  <a
+                    href={a.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.mediaArtistChip}
+                    title={a.name}
+                  >
+                    {a.image ? (
+                      <Image
+                        src={a.image}
+                        alt=""
+                        width={28}
+                        height={28}
+                        className={styles.mediaArtistImg}
+                        unoptimized
+                      />
+                    ) : (
+                      <span className={styles.mediaArtistImgFallback} aria-hidden />
+                    )}
+                    <span className={styles.mediaArtistName}>{a.name}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )
+        ) : (
+          <p className={styles.mediaEmpty}>Loading…</p>
+        )}
+      </section>
     </div>
   );
 }

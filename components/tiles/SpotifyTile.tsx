@@ -95,82 +95,116 @@ export function SpotifyTile({ span }: { span?: string }) {
             )}
           </div>
 
-          {!!top?.topArtists?.length && (
-            <div className="flex flex-col gap-2">
-              <span className="text-sm font-medium text-[var(--color-fg)]">
-                Artists I&apos;m into lately
-              </span>
-              <ul className="flex gap-2 overflow-x-auto pb-1">
-                {top.topArtists.slice(0, 5).map((a) => (
-                  <li key={a.url} className="shrink-0">
-                    <a
-                      href={a.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex w-14 flex-col items-center gap-1 text-center"
-                      title={a.name}
-                    >
-                      {a.image ? (
-                        <Image
-                          src={a.image}
-                          alt=""
-                          width={48}
-                          height={48}
-                          className="size-12 rounded-full object-cover"
-                          unoptimized
-                        />
-                      ) : (
-                        <div className="size-12 rounded-full bg-[var(--color-bg-2)]" />
-                      )}
-                      <span className="line-clamp-2 text-[10px] text-[var(--color-fg-muted)]">
-                        {a.name}
-                      </span>
-                    </a>
+          <div className="flex flex-col gap-2">
+            <span className="text-sm font-medium text-[var(--color-fg)]">
+              Songs I&apos;ve been into lately
+            </span>
+            {top ? (
+              top.topTracks.length === 0 ? (
+                <p className="text-xs text-[var(--color-fg-muted)]">
+                  Spotify trends unavailable right now.
+                </p>
+              ) : (
+                <ul className="flex gap-2 overflow-x-auto pb-1">
+                  {top.topTracks.slice(0, 5).map((t) => (
+                    <li key={t.url} className="shrink-0">
+                      <a
+                        href={t.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex w-14 flex-col items-center gap-1 text-center"
+                        title={`${t.name} — ${t.artist}`}
+                      >
+                        {t.image ? (
+                          <Image
+                            src={t.image}
+                            alt=""
+                            width={48}
+                            height={48}
+                            className="size-12 rounded-md object-cover"
+                            unoptimized
+                          />
+                        ) : (
+                          <div className="size-12 rounded-md bg-[var(--color-bg-2)]" />
+                        )}
+                        <span className="line-clamp-2 text-[10px] leading-tight text-[var(--color-fg)]">
+                          {t.name}
+                        </span>
+                        <span className="line-clamp-2 text-[9px] leading-tight text-[var(--color-fg-muted)]">
+                          {t.artist}
+                        </span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )
+            ) : (
+              <ul className="flex gap-2 overflow-x-auto pb-1" aria-hidden>
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <li key={i} className="shrink-0">
+                    <div className="flex w-14 flex-col items-center gap-1">
+                      <div className="size-12 animate-pulse rounded-md bg-[var(--color-bg-2)]" />
+                      <div className="h-2 w-10 animate-pulse rounded bg-[var(--color-bg-2)]" />
+                    </div>
                   </li>
                 ))}
               </ul>
-            </div>
-          )}
+            )}
+          </div>
 
-          {!!top?.topTracks?.length && (
-            <div className="flex flex-col gap-2">
-              <span className="text-sm font-medium text-[var(--color-fg)]">
-                Recent tracks
-              </span>
-              <ul className="flex gap-2 overflow-x-auto pb-1">
-                {top.topTracks.slice(0, 5).map((t) => (
-                  <li key={t.url} className="shrink-0">
-                    <a
-                      href={t.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex w-14 flex-col items-center gap-1 text-center"
-                      title={`${t.name} — ${t.artist}`}
-                    >
-                      {t.image ? (
-                        <Image
-                          src={t.image}
-                          alt=""
-                          width={48}
-                          height={48}
-                          className="size-12 rounded-md object-cover"
-                          unoptimized
-                        />
-                      ) : (
-                        <div className="size-12 rounded-md bg-[var(--color-bg-2)]" />
-                      )}
-                      <span className="line-clamp-2 text-[10px] leading-tight text-[var(--color-fg)]">
-                        {t.name}
-                      </span>
-                      <span className="line-clamp-2 text-[9px] leading-tight text-[var(--color-fg-muted)]">
-                        {t.artist}
-                      </span>
-                    </a>
+          <div className="flex flex-col gap-2">
+            <span className="text-sm font-medium text-[var(--color-fg)]">
+              Recent artists
+            </span>
+            {top ? (
+              top.topArtists.length === 0 ? (
+                <p className="text-xs text-[var(--color-fg-muted)]">
+                  Spotify trends unavailable right now.
+                </p>
+              ) : (
+                <ul className="flex gap-2 overflow-x-auto pb-1">
+                  {top.topArtists.slice(0, 5).map((a) => (
+                    <li key={a.url} className="shrink-0">
+                      <a
+                        href={a.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex w-14 flex-col items-center gap-1 text-center"
+                        title={a.name}
+                      >
+                        {a.image ? (
+                          <Image
+                            src={a.image}
+                            alt=""
+                            width={48}
+                            height={48}
+                            className="size-12 rounded-full object-cover"
+                            unoptimized
+                          />
+                        ) : (
+                          <div className="size-12 rounded-full bg-[var(--color-bg-2)]" />
+                        )}
+                        <span className="line-clamp-2 text-[10px] text-[var(--color-fg-muted)]">
+                          {a.name}
+                        </span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )
+            ) : (
+              <ul className="flex gap-2 overflow-x-auto pb-1" aria-hidden>
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <li key={i} className="shrink-0">
+                    <div className="flex w-14 flex-col items-center gap-1">
+                      <div className="size-12 animate-pulse rounded-full bg-[var(--color-bg-2)]" />
+                      <div className="h-2 w-10 animate-pulse rounded bg-[var(--color-bg-2)]" />
+                    </div>
                   </li>
                 ))}
               </ul>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       )}
     </Tile>

@@ -28,7 +28,10 @@ export async function GET(req: Request) {
     const token = await getSpotifyAccessToken();
     if (!token) {
       captureServerEvent("spotify_top_error", { reason: "no_token" }, distinctId);
-      return NextResponse.json({ topArtists: [], topTracks: [] } satisfies SpotifyTopResponse);
+      return NextResponse.json(
+        { topArtists: [], topTracks: [] } satisfies SpotifyTopResponse,
+        { headers: { "X-Spotify-Top": "no-token" } },
+      );
     }
 
     const [artistsRes, tracksRes] = await Promise.all([
@@ -41,6 +44,18 @@ export async function GET(req: Request) {
         { headers: { Authorization: `Bearer ${token}` }, next: { revalidate: 3600 } },
       ),
     ]);
+
+    if (!artistsRes.ok || !tracksRes.ok) {
+      captureServerEvent(
+        "spotify_top_error",
+        {
+          reason: "api_error",
+          artists_status: artistsRes.status,
+          tracks_status: tracksRes.status,
+        },
+        distinctId,
+      );
+    }
 
     const topArtists: TopArtist[] = artistsRes.ok
       ? ((await artistsRes.json()) as {
@@ -72,13 +87,20 @@ export async function GET(req: Request) {
           })) ?? []
       : [];
 
-    return NextResponse.json({ topArtists, topTracks } satisfies SpotifyTopResponse);
-  } catch (error) {
-    captureServerEvent(
-      "spotify_top_error",
-      { reason: error instanceof Error ? error.message : "unknown" },
-      distinctId,
+    return NextResponse.json(
+      { topArtists, topTracks } satisfies SpotifyTopResponse,
+      {
+        headers: {
+          "X-Spotify-Top": `ok artists=${artistsRes.status}/${topArtists.length} tracks=${tracksRes.status}/${topTracks.length}`,
+        },
+      },
     );
-    return NextResponse.json({ topArtists: [], topTracks: [] } satisfies SpotifyTopResponse);
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : "unknown";
+    captureServerEvent("spotify_top_error", { reason }, distinctId);
+    return NextResponse.json(
+      { topArtists: [], topTracks: [] } satisfies SpotifyTopResponse,
+      { headers: { "X-Spotify-Top": `error: ${reason.slice(0, 80)}` } },
+    );
   }
 }
