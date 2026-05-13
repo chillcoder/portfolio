@@ -52,9 +52,10 @@ export const viewport: Viewport = {
 const themeInitScript = `
 (function () {
   try {
+    var allowed = ['light', 'dark', 'terminal', 'posthog'];
     var stored = localStorage.getItem('theme');
     var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    var theme = stored || (prefersDark ? 'dark' : 'light');
+    var theme = allowed.indexOf(stored) >= 0 ? stored : (prefersDark ? 'dark' : 'light');
     document.documentElement.setAttribute('data-theme', theme);
   } catch (e) {
     document.documentElement.setAttribute('data-theme', 'light');
