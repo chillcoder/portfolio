@@ -1,7 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, type ReactNode } from "react";
-import { Sidebar, type SidebarFolderId } from "@/components/os/Sidebar";
+import { useCallback, useEffect, useState } from "react";
 import { Window } from "@/components/os/Window";
 import { DesktopIcon } from "@/components/os/DesktopIcon";
 import { ExtensionGlyph, type FileExtension } from "@/components/os/FileIcon";
@@ -15,10 +14,20 @@ import { NowPlayingWindow } from "@/components/os/windows/NowPlayingWindow";
 import { PlayWindow } from "@/components/os/windows/PlayWindow";
 import { ContactWindow } from "@/components/os/windows/ContactWindow";
 import { SecretsWindow } from "@/components/os/windows/SecretsWindow";
+import { PROFILE } from "@/lib/portfolio-data";
 import { track } from "@/lib/track";
 import styles from "@/app/os/os.module.css";
 
-type MainWindowId = Exclude<SidebarFolderId, "now-playing"> | "contact";
+type MainWindowId =
+  | "about"
+  | "work"
+  | "projects"
+  | "field-notes"
+  | "travel"
+  | "photography"
+  | "play"
+  | "contact"
+  | "secrets";
 
 const MAIN_TITLES: Record<MainWindowId, string> = {
   about: "about.md",
@@ -30,6 +39,18 @@ const MAIN_TITLES: Record<MainWindowId, string> = {
   play: "renewal-defense.exe",
   contact: "contact.app",
   secrets: "secrets/",
+};
+
+const MAIN_ICON: Record<MainWindowId, FileExtension> = {
+  about: ".md",
+  work: ".txt",
+  projects: ".app",
+  "field-notes": ".txt",
+  travel: ".jpg",
+  photography: ".jpg",
+  play: ".exe",
+  contact: ".app",
+  secrets: ".txt",
 };
 
 function MainWindowBody({ id }: { id: MainWindowId }) {
@@ -55,22 +76,6 @@ function MainWindowBody({ id }: { id: MainWindowId }) {
   }
 }
 
-function TitleGlyph({ extension }: { extension: FileExtension }) {
-  return <ExtensionGlyph extension={extension} />;
-}
-
-const MAIN_ICON: Record<MainWindowId, FileExtension> = {
-  about: ".md",
-  work: ".txt",
-  projects: ".app",
-  "field-notes": ".txt",
-  travel: ".jpg",
-  photography: ".jpg",
-  play: ".exe",
-  contact: ".app",
-  secrets: ".txt",
-};
-
 const KONAMI: ReadonlyArray<string> = [
   "ArrowUp",
   "ArrowUp",
@@ -85,6 +90,37 @@ const KONAMI: ReadonlyArray<string> = [
 ];
 
 const KONAMI_DURATION_MS = 5000;
+
+// Left-side icon columns (portfolio sections). Two columns to match the
+// PostHog-style edge layout.
+const LEFT_COL_A: { id: MainWindowId; label: string; ext: FileExtension }[] = [
+  { id: "about", label: "about.md", ext: ".md" },
+  { id: "work", label: "career.log", ext: ".txt" },
+  { id: "projects", label: "Projects", ext: ".app" },
+  { id: "field-notes", label: "field-notes.txt", ext: ".txt" },
+  { id: "travel", label: "travel.album", ext: ".jpg" },
+];
+
+const LEFT_COL_B: { id: MainWindowId; label: string; ext: FileExtension }[] = [
+  { id: "photography", label: "photography/", ext: ".jpg" },
+  { id: "play", label: "renewal-defense.exe", ext: ".exe" },
+  { id: "contact", label: "contact.app", ext: ".app" },
+  { id: "secrets", label: "secrets/", ext: ".archive" },
+];
+
+// Right-side icon column (external links + escape hatch).
+const RIGHT_COL: {
+  label: string;
+  href: string;
+  ext: FileExtension;
+  target?: string;
+}[] = [
+  { label: "github.url", href: PROFILE.socials.github, ext: ".url" },
+  { label: "linkedin.url", href: PROFILE.socials.linkedin, ext: ".url" },
+  { label: "twitter.url", href: PROFILE.socials.twitter, ext: ".url" },
+  { label: "email.url", href: `mailto:${PROFILE.email}`, ext: ".url" },
+  { label: "view-bento.url", href: "/", ext: ".url", target: "_self" },
+];
 
 export function WindowManager() {
   const [activeMain, setActiveMain] = useState<MainWindowId | null>("about");
@@ -101,20 +137,9 @@ export function WindowManager() {
     track("os_window_close", { id: "main" });
   }, []);
 
-  const handleSidebarSelect = useCallback(
-    (id: SidebarFolderId) => {
-      if (id === "now-playing") {
-        setPinnedClosed(false);
-        track("os_window_open", { id: "now-playing" });
-        return;
-      }
-      openMain(id);
-    },
-    [openMain],
-  );
-
-  // Konami code → swap to chess wallpaper for 5 seconds.
-  // Skip if focus is inside the play window (LaneDefense has its own konami handler).
+  // Konami code → swap the desktop wallpaper to a chess board for 5 seconds.
+  // Skipped while the Play window is active (LaneDefenseTile owns the same
+  // sequence in-game) and ignored for keys typed into form fields.
   useEffect(() => {
     let idx = 0;
     function onKey(e: KeyboardEvent) {
@@ -154,66 +179,77 @@ export function WindowManager() {
     konami ? ` ${styles.konamiWallpaper}` : ""
   }`;
 
-  // Sidebar's `activeId` is what's highlighted. `contact` is desktop-only
-  // (no sidebar folder), so map to null in that case.
-  const sidebarActive: SidebarFolderId | null =
-    activeMain && activeMain !== "contact" ? activeMain : null;
-
   return (
-    <div className={styles.desktopBody}>
-      <Sidebar activeId={sidebarActive} onSelect={handleSidebarSelect} />
-      <main className={surfaceClass} aria-label="Desktop">
-        <DesktopIcon
-          label="README.txt"
-          icon={<ExtensionGlyph extension=".txt" size={32} />}
-          onClick={() => openMain("about")}
-        />
-        <DesktopIcon
-          label="renewal-defense.exe"
-          icon={<ExtensionGlyph extension=".exe" size={32} />}
-          onClick={() => openMain("play")}
-        />
-        <DesktopIcon
-          label="contact.app"
-          icon={<ExtensionGlyph extension=".app" size={32} />}
-          onClick={() => openMain("contact")}
-        />
+    <main className={surfaceClass} aria-label="Desktop">
+      <div className={styles.iconLayer} aria-hidden={false}>
+        <div className={styles.iconColumns}>
+          <div className={styles.iconColumn}>
+            {LEFT_COL_A.map((it) => (
+              <DesktopIcon
+                key={it.id}
+                label={it.label}
+                icon={<ExtensionGlyph extension={it.ext} size={32} />}
+                onClick={() => openMain(it.id)}
+                selected={activeMain === it.id}
+              />
+            ))}
+          </div>
+          <div className={styles.iconColumn}>
+            {LEFT_COL_B.map((it) => (
+              <DesktopIcon
+                key={it.id}
+                label={it.label}
+                icon={<ExtensionGlyph extension={it.ext} size={32} />}
+                onClick={() => openMain(it.id)}
+                selected={activeMain === it.id}
+              />
+            ))}
+          </div>
+        </div>
+        <div className={styles.iconColumn}>
+          {RIGHT_COL.map((it) => (
+            <DesktopIcon
+              key={it.label}
+              label={it.label}
+              icon={<ExtensionGlyph extension={it.ext} size={32} />}
+              href={it.href}
+              target={it.target}
+            />
+          ))}
+          {!pinnedClosed ? null : (
+            <DesktopIcon
+              key="reopen-now-playing"
+              label="media-player.exe"
+              icon={<ExtensionGlyph extension=".exe" size={32} />}
+              onClick={() => setPinnedClosed(false)}
+            />
+          )}
+        </div>
+      </div>
 
-        {activeMain && (
-          <WindowSlot key={activeMain} className={mainSlotClass}>
-            <Window
-              title={MAIN_TITLES[activeMain]}
-              icon={<TitleGlyph extension={MAIN_ICON[activeMain]} />}
-              active
-              onClose={closeMain}
-            >
-              <MainWindowBody id={activeMain} />
-            </Window>
-          </WindowSlot>
-        )}
+      {activeMain && (
+        <Window
+          key={activeMain}
+          title={MAIN_TITLES[activeMain]}
+          icon={<ExtensionGlyph extension={MAIN_ICON[activeMain]} />}
+          active
+          onClose={closeMain}
+          className={mainSlotClass}
+        >
+          <MainWindowBody id={activeMain} />
+        </Window>
+      )}
 
-        {!pinnedClosed && (
-          <WindowSlot className={styles.windowSlotPinned}>
-            <Window
-              title="media-player.exe"
-              icon={<TitleGlyph extension=".exe" />}
-              onClose={() => setPinnedClosed(true)}
-            >
-              <NowPlayingWindow />
-            </Window>
-          </WindowSlot>
-        )}
-      </main>
-    </div>
+      {!pinnedClosed && (
+        <Window
+          title="media-player.exe"
+          icon={<ExtensionGlyph extension=".exe" />}
+          onClose={() => setPinnedClosed(true)}
+          className={styles.windowSlotPinned}
+        >
+          <NowPlayingWindow />
+        </Window>
+      )}
+    </main>
   );
-}
-
-function WindowSlot({
-  className,
-  children,
-}: {
-  className: string;
-  children: ReactNode;
-}) {
-  return <div className={className}>{children}</div>;
 }
