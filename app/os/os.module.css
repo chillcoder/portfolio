@@ -1,0 +1,158 @@
+/* All styles scoped to .osRoot. Nothing here leaks into the bento route. */
+
+.osRoot {
+  /* --- design tokens (Phase 1) --- */
+  --os-desktop: #e8e1cc;
+  --os-window-bg: #fafaf7;
+  --os-chrome: #d4cfc0;
+  --os-chrome-active: #2b2b2b;
+  --os-border: #1a1a1a;
+  --os-ink: #1a1a1a;
+  --os-muted: #6b6b6b;
+  --os-accent: #ff5a1f;
+  --os-shadow: 4px 4px 0 #1a1a1a;
+
+  --os-menubar-h: 28px;
+  --os-taskbar-h: 40px;
+
+  position: fixed;
+  inset: 0;
+  background: var(--os-desktop);
+  color: var(--os-ink);
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+  font-size: 13px;
+  line-height: 1.4;
+  overflow: hidden;
+  z-index: 1;
+}
+
+/* Hard borders only — kill rounded corners anywhere inside .osRoot. */
+.osRoot,
+.osRoot *,
+.osRoot *::before,
+.osRoot *::after {
+  border-radius: 0 !important;
+}
+
+.osRoot ::selection {
+  background: var(--os-accent);
+  color: #fff;
+}
+
+.desktop {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  isolation: isolate;
+}
+
+/* ~3% noise wash. The SVG fractalNoise filter mirrors the bento `.noise`
+   utility but lives entirely inside this scoped module. */
+.noiseOverlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/></svg>");
+  opacity: 0.03;
+  mix-blend-mode: multiply;
+  z-index: 0;
+}
+
+.menuBar {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  height: var(--os-menubar-h);
+  padding: 0 0.75rem;
+  background: var(--os-chrome);
+  border-bottom: 1px solid var(--os-border);
+  font-size: 12px;
+  user-select: none;
+}
+
+.menuBarBrand {
+  font-family: var(--font-pixelify), system-ui;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.menuBarItem {
+  cursor: default;
+  padding: 0 0.35rem;
+}
+
+.menuBarItem:hover {
+  background: var(--os-chrome-active);
+  color: #fff;
+}
+
+.taskbar {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--os-taskbar-h);
+  padding: 0 0.875rem;
+  background: var(--os-chrome);
+  border-top: 1px solid var(--os-border);
+  user-select: none;
+}
+
+.taskbarBrand {
+  font-family: var(--font-pixelify), system-ui;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.06em;
+}
+
+.taskbarRight {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 12px;
+}
+
+.onlineGroup {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--os-muted);
+}
+
+.onlineDot {
+  width: 8px;
+  height: 8px;
+  background: #16a34a;
+  display: inline-block;
+  animation: osPulse 1.6s ease-in-out infinite;
+}
+
+.taskbarTime {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+
+@keyframes osPulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(0.78);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .onlineDot {
+    animation: none;
+  }
+}
