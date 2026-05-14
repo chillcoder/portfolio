@@ -32,6 +32,15 @@ export function Header() {
         <NowPlayingMarquee />
         <nav className="flex items-center gap-1" aria-label="Social links">
           <SocialIconLinks source="header" />
+          <span
+            className="hidden shrink-0 items-center gap-0.5 text-[11px] leading-none text-[var(--color-fg-muted)] md:inline-flex"
+            aria-hidden
+          >
+            <span className="translate-y-px" aria-hidden>
+              ↗
+            </span>
+            <span>Try a new theme</span>
+          </span>
           <ThemeToggle />
         </nav>
       </div>

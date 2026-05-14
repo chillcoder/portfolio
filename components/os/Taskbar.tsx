@@ -69,6 +69,9 @@ export function Taskbar() {
         aria-label="Exit Lucas-OS, return to bento dashboard"
         onClick={() => track("view_switched", { to: "bento" })}
       >
+        <span className={styles.taskbarBrandHint} aria-hidden>
+          ←
+        </span>
         LUCAS-OS
       </Link>
       <div className={styles.taskbarRight}>

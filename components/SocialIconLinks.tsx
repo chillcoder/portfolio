@@ -1,15 +1,13 @@
 "use client";
 
 import { PROFILE } from "@/config/profile";
-import { IconGithub, IconInstagram, IconLinkedIn, IconX } from "@/components/icons/social";
+import { IconGithub, IconLinkedIn } from "@/components/icons/social";
 import { cn } from "@/lib/cn";
 import { track } from "@/lib/track";
 
 const ITEMS = [
   { key: "github", label: "GitHub", href: PROFILE.socials.github, Icon: IconGithub },
   { key: "linkedin", label: "LinkedIn", href: PROFILE.socials.linkedin, Icon: IconLinkedIn },
-  { key: "twitter", label: "X", href: PROFILE.socials.twitter, Icon: IconX },
-  { key: "instagram", label: "Instagram", href: PROFILE.socials.instagram, Icon: IconInstagram },
 ] as const;
 
 export function SocialIconLinks({

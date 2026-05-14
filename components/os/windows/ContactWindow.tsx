@@ -8,7 +8,6 @@ const ROWS: { label: string; href: string }[] = [
   { label: "email", href: `mailto:${PROFILE.email}` },
   { label: "github", href: PROFILE.socials.github },
   { label: "linkedin", href: PROFILE.socials.linkedin },
-  { label: "twitter", href: PROFILE.socials.twitter },
 ];
 
 export function ContactWindow() {

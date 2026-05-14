@@ -154,7 +154,7 @@ export function ThemeToggle() {
             >
               ▣
             </span>
-            <span className="flex-1">Lucas-OS</span>
+            <span className="flex-1">Lucas-OS (PostHog)</span>
             <span aria-hidden className="text-xs text-[var(--color-fg-muted)]">
               →
             </span>

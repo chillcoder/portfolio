@@ -117,7 +117,6 @@ const RIGHT_COL: {
 }[] = [
   { label: "github.url", href: PROFILE.socials.github, ext: ".url" },
   { label: "linkedin.url", href: PROFILE.socials.linkedin, ext: ".url" },
-  { label: "twitter.url", href: PROFILE.socials.twitter, ext: ".url" },
   { label: "email.url", href: `mailto:${PROFILE.email}`, ext: ".url" },
   { label: "view-bento.url", href: "/", ext: ".url", target: "_self" },
 ];

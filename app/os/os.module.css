@@ -123,6 +123,24 @@
   letter-spacing: 0.04em;
 }
 
+.menuBarBrandLink {
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.menuBarBrandLink:hover {
+  background: var(--os-chrome-active);
+  color: #fff;
+  padding: 0 0.35rem;
+  margin: 0 -0.35rem;
+}
+
+.menuBarBrandLink:focus-visible {
+  outline: 2px solid var(--os-accent);
+  outline-offset: 2px;
+}
+
 .menuBarItem {
   cursor: default;
   padding: 0 0.35rem;
@@ -155,6 +173,16 @@
   color: inherit;
   text-decoration: none;
   cursor: pointer;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.2em;
+}
+
+.taskbarBrandHint {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--os-muted);
+  letter-spacing: 0;
 }
 
 .taskbarBrand:hover {
@@ -162,6 +190,10 @@
   color: #fff;
   padding: 0 0.4em;
   margin: 0 -0.4em;
+}
+
+.taskbarBrand:hover .taskbarBrandHint {
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .taskbarRight {
@@ -432,17 +464,19 @@
 }
 
 .desktopIconArt {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  padding: 2px;
+  box-shadow: 2px 2px 0 rgba(26, 26, 26, 0.12);
 }
 
 .desktopIcon:hover .desktopIconArt {
   outline: 1px solid var(--os-border);
   outline-offset: 2px;
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.35);
 }
 
 .desktopIconLabel {

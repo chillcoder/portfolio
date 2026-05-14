@@ -25,6 +25,17 @@ function profileUrl(username: string) {
   return `https://github.com/${username}`;
 }
 
+/** Per-day sum of the trailing 7 entries (shorter at the start of the series). */
+function rolling7DaySum(counts: number[]): number[] {
+  if (!counts.length) return [];
+  return counts.map((_, i) => {
+    const from = Math.max(0, i - 6);
+    let sum = 0;
+    for (let j = from; j <= i; j++) sum += counts[j] ?? 0;
+    return sum;
+  });
+}
+
 export function GithubTile({ span }: { span?: string }) {
   const { data, isLoading } = useCachedFetch<GithubStats>("/api/github-stats", {
     cacheKey: "github_stats_v5",
@@ -35,8 +46,8 @@ export function GithubTile({ span }: { span?: string }) {
   const href = data?.username ? profileUrl(data.username) : PROFILE.socials.github;
   const sparkTitle =
     data?.daily?.length ?
-      `Last ${data.daily.length} days on GitHub (click to open profile)`
-    : "Contribution trend";
+      `Last ${data.daily.length} days — 7-day rolling sum of contributions (click to open profile)`
+    : "Contribution trend (7-day rolling sum)";
 
   const year = data?.contributionsThisYear ?? 0;
   const showYearHint = year >= 100;
@@ -78,7 +89,7 @@ export function GithubTile({ span }: { span?: string }) {
               className="flex shrink-0 justify-end transition group-hover:brightness-110 sm:pb-0.5"
             >
               <Sparkline
-                values={(data?.daily ?? []).map((d) => d.count)}
+                values={rolling7DaySum((data?.daily ?? []).map((d) => d.count))}
                 width={160}
                 height={44}
                 className="max-w-[min(100%,11rem)] sm:max-w-none"
