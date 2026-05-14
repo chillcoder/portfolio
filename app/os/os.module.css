@@ -70,7 +70,7 @@
    The center is left intentionally empty for windows. */
 .iconLayer {
   position: absolute;
-  inset: 16px;
+  inset: 28px 36px;
   display: flex;
   justify-content: space-between;
   pointer-events: none;
@@ -79,14 +79,14 @@
 
 .iconColumns {
   display: flex;
-  gap: 8px;
+  gap: 22px;
   pointer-events: none;
 }
 
 .iconColumn {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 14px;
   pointer-events: auto;
   align-items: center;
 }
@@ -105,7 +105,7 @@
 
 .menuBar {
   position: relative;
-  z-index: 2;
+  z-index: 50;
   display: flex;
   align-items: center;
   gap: 1.25rem;
@@ -149,6 +149,73 @@
 .menuBarItem:hover {
   background: var(--os-chrome-active);
   color: #fff;
+}
+
+.menuBarMenuWrap {
+  position: relative;
+}
+
+.menuBarTrigger {
+  cursor: pointer;
+  padding: 0 0.35rem;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+}
+
+.menuBarTrigger:hover,
+.menuBarTrigger[aria-expanded="true"] {
+  background: var(--os-chrome-active);
+  color: #fff;
+}
+
+.menuPullDown {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 2px);
+  min-width: 11.5rem;
+  padding: 4px 0;
+  background: var(--os-window-bg);
+  border: 1px solid var(--os-border);
+  box-shadow: var(--os-shadow);
+  z-index: 60;
+}
+
+.menuPullDownItem {
+  display: block;
+  width: 100%;
+  padding: 6px 12px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+  color: var(--os-ink);
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.menuPullDownItem:hover:not(:disabled) {
+  background: var(--os-chrome);
+}
+
+.menuPullDownItem:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.menuPullDownSep {
+  height: 1px;
+  margin: 4px 0;
+  background: var(--os-border);
+}
+
+.menuPullDownHint {
+  padding: 8px 12px 4px;
+  font-size: 10px;
+  line-height: 1.35;
+  color: var(--os-muted);
 }
 
 .taskbar {
@@ -567,7 +634,7 @@
     display: none;
   }
   .iconLayer {
-    inset: 8px;
+    inset: 12px 16px;
   }
 }
 

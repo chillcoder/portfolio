@@ -17,17 +17,8 @@ import { SecretsWindow } from "@/components/os/windows/SecretsWindow";
 import { PROFILE } from "@/lib/portfolio-data";
 import { track } from "@/lib/track";
 import styles from "@/app/os/os.module.css";
-
-type MainWindowId =
-  | "about"
-  | "work"
-  | "projects"
-  | "field-notes"
-  | "travel"
-  | "photography"
-  | "play"
-  | "contact"
-  | "secrets";
+import { MenuBar } from "@/components/os/MenuBar";
+import type { MainWindowId } from "@/components/os/mainWindowTypes";
 
 const MAIN_TITLES: Record<MainWindowId, string> = {
   about: "about.md",
@@ -179,7 +170,15 @@ export function WindowManager() {
   }`;
 
   return (
-    <main className={surfaceClass} aria-label="Desktop">
+    <>
+      <MenuBar
+        activeMain={activeMain}
+        onOpenMain={openMain}
+        onCloseMain={closeMain}
+        pinnedClosed={pinnedClosed}
+        onTogglePinned={() => setPinnedClosed((v) => !v)}
+      />
+      <main className={surfaceClass} aria-label="Desktop">
       <div className={styles.iconLayer} aria-hidden={false}>
         <div className={styles.iconColumns}>
           <div className={styles.iconColumn}>
@@ -250,5 +249,6 @@ export function WindowManager() {
         </Window>
       )}
     </main>
+    </>
   );
 }

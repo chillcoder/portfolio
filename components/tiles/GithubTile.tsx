@@ -25,6 +25,17 @@ function profileUrl(username: string) {
   return `https://github.com/${username}`;
 }
 
+/** Light 3-sample moving average (edges mirror) for a calmer sparkline. */
+function smooth3(values: number[]): number[] {
+  if (values.length <= 2) return values;
+  return values.map((_, i) => {
+    const a = values[i - 1] ?? values[i];
+    const b = values[i];
+    const c = values[i + 1] ?? values[i];
+    return (a + b + c) / 3;
+  });
+}
+
 /** Per-day sum of the trailing 7 entries (shorter at the start of the series). */
 function rolling7DaySum(counts: number[]): number[] {
   if (!counts.length) return [];
@@ -89,10 +100,12 @@ export function GithubTile({ span }: { span?: string }) {
               className="flex shrink-0 justify-end transition group-hover:brightness-110 sm:pb-0.5"
             >
               <Sparkline
-                values={rolling7DaySum((data?.daily ?? []).map((d) => d.count))}
+                values={smooth3(rolling7DaySum((data?.daily ?? []).map((d) => d.count)))}
                 width={160}
                 height={44}
                 className="max-w-[min(100%,11rem)] sm:max-w-none"
+                smoothing={0.42}
+                strokeWidth={1.75}
               />
             </span>
           </a>

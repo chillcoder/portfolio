@@ -32,16 +32,41 @@ export function Header() {
         <NowPlayingMarquee />
         <nav className="flex items-center gap-1" aria-label="Social links">
           <SocialIconLinks source="header" />
-          <span
-            className="hidden shrink-0 items-center gap-0.5 text-[11px] leading-none text-[var(--color-fg-muted)] md:inline-flex"
-            aria-hidden
-          >
-            <span className="translate-y-px" aria-hidden>
-              ↗
+          <div className="hidden shrink-0 items-center md:flex">
+            <span
+              className="max-w-[7.5rem] pr-1 text-right text-[11px] leading-snug text-[var(--color-fg-muted)]"
+              aria-hidden
+            >
+              Try a new theme
             </span>
-            <span>Try a new theme</span>
-          </span>
-          <ThemeToggle />
+            <svg
+              width="30"
+              height="26"
+              viewBox="0 0 30 26"
+              className="-mr-1 shrink-0 text-[var(--color-fg-muted)]"
+              aria-hidden
+            >
+              <path
+                d="M1 20 C6 20, 10 18, 14 14 C18 10, 22 8, 27 13"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.35"
+                strokeLinecap="round"
+              />
+              <path
+                d="M22 8 L27 13 L24 18"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.35"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <ThemeToggle />
+          </div>
+          <div className="md:hidden">
+            <ThemeToggle />
+          </div>
         </nav>
       </div>
     </header>
