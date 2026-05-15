@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { Object3D } from "three";
 import type { GlobeMethods } from "react-globe.gl";
 import { Tile } from "@/components/ui/Tile";
 import { TileSkeleton } from "@/components/ui/TileSkeleton";
@@ -50,6 +51,21 @@ type GlobePoint = {
   size: number;
 };
 
+/** Central angle in degrees between two surface positions (great-circle). */
+function angularDistanceDeg(
+  lat1: number,
+  lng1: number,
+  lat2: number,
+  lng2: number,
+): number {
+  const φ1 = (lat1 * Math.PI) / 180;
+  const φ2 = (lat2 * Math.PI) / 180;
+  const Δλ = ((lng2 - lng1) * Math.PI) / 180;
+  const cos =
+    Math.sin(φ1) * Math.sin(φ2) + Math.cos(φ1) * Math.cos(φ2) * Math.cos(Δλ);
+  return (Math.acos(Math.min(1, Math.max(-1, cos))) * 180) / Math.PI;
+}
+
 function pointLabelHtml(d: GlobePoint): string {
   if (d.isHome) {
     return `<div style="font-family:ui-monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:#fff;background:rgba(0,0,0,0.7);padding:4px 8px;border-radius:4px;">${d.name}</div>`;
@@ -72,6 +88,13 @@ export function GlobeTile({ span }: { span?: string }) {
   const [arcMode, setArcMode] = useState<ArcMode>("hub");
   const [ufoActive, setUfoActive] = useState(false);
   const ufoTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** Nearest city from geographic hit-test (not sprite raycast). */
+  const [geoHover, setGeoHover] = useState<GlobePoint | null>(null);
+  const [geoLabelPos, setGeoLabelPos] = useState<{ x: number; y: number } | null>(
+    null,
+  );
+  const lastTrackedCityHover = useRef<string | null>(null);
+  const lastGeoHoverFlush = useRef(0);
 
   const clearUfoTimeout = useCallback(() => {
     if (ufoTimeout.current) {
@@ -161,31 +184,123 @@ export function GlobeTile({ span }: { span?: string }) {
     [arcMode],
   );
 
-  const onPointHover = useCallback(
-    (p: unknown) => {
-      const point = p as GlobePoint | null;
+  const respondToHoverTarget = useCallback(
+    (point: GlobePoint | null) => {
       if (point?.isArea51) {
         clearUfoTimeout();
         setUfoActive(true);
         return;
       }
       clearUfoTimeout();
-      ufoTimeout.current = setTimeout(() => setUfoActive(false), point ? 200 : 450);
+      ufoTimeout.current = setTimeout(
+        () => setUfoActive(false),
+        point ? 200 : 450,
+      );
     },
     [clearUfoTimeout],
   );
 
-  const onPointClick = useCallback(
-    (p: unknown) => {
-      const point = p as GlobePoint | undefined;
-      if (point?.isArea51) {
-        clearUfoTimeout();
-        setUfoActive(true);
-        track("globe_area51_ufo", { source: "click" });
-        ufoTimeout.current = setTimeout(() => setUfoActive(false), 2800);
+  /** Sprite billboards share large raycast hit areas; ignore points for picking. */
+  const pointerEventsFilter = useCallback((object: Object3D) => {
+    const t = (object as unknown as { __globeObjType?: string }).__globeObjType;
+    return t !== "point";
+  }, []);
+
+  const flushGeoHover = useCallback(
+    (clientX: number, clientY: number) => {
+      const root = containerRef.current;
+      const g = globeRef.current;
+      if (!root || !g) return;
+
+      const r = root.getBoundingClientRect();
+      const x = clientX - r.left;
+      const y = clientY - r.top;
+      if (x < 0 || y < 0 || x > r.width || y > r.height) {
+        lastTrackedCityHover.current = null;
+        setGeoHover(null);
+        setGeoLabelPos(null);
+        respondToHoverTarget(null);
+        return;
+      }
+
+      const geo = g.toGlobeCoords(x, y);
+      if (!geo) {
+        lastTrackedCityHover.current = null;
+        setGeoHover(null);
+        setGeoLabelPos(null);
+        respondToHoverTarget(null);
+        return;
+      }
+
+      const pov = g.pointOfView();
+      const alt = Math.max(0.12, pov.altitude);
+      const maxDeg = Math.min(15, Math.max(3.2, 3.8 * Math.sqrt(alt)));
+
+      let best: GlobePoint | null = null;
+      let bestD = Infinity;
+      for (const pt of points) {
+        const d = angularDistanceDeg(geo.lat, geo.lng, pt.lat, pt.lng);
+        if (d < bestD) {
+          bestD = d;
+          best = pt;
+        }
+      }
+
+      if (!best || bestD > maxDeg) {
+        lastTrackedCityHover.current = null;
+        setGeoHover(null);
+        setGeoLabelPos(null);
+        respondToHoverTarget(null);
+        return;
+      }
+
+      if (!best.isHome && best.name !== lastTrackedCityHover.current) {
+        lastTrackedCityHover.current = best.name;
+        track("globe_city_hover", { city: best.name });
+      }
+      if (best.isHome) lastTrackedCityHover.current = null;
+
+      setGeoHover(best);
+      setGeoLabelPos(g.getScreenCoords(best.lat, best.lng, 0.02));
+      respondToHoverTarget(best);
+    },
+    [points, respondToHoverTarget],
+  );
+
+  const onPointerMoveGeo = useCallback(
+    (e: { clientX: number; clientY: number }) => {
+      const now = performance.now();
+      if (now - lastGeoHoverFlush.current < 24) return;
+      lastGeoHoverFlush.current = now;
+      flushGeoHover(e.clientX, e.clientY);
+    },
+    [flushGeoHover],
+  );
+
+  const onPointerLeaveGeo = useCallback(() => {
+    lastGeoHoverFlush.current = 0;
+    lastTrackedCityHover.current = null;
+    setGeoHover(null);
+    setGeoLabelPos(null);
+    respondToHoverTarget(null);
+  }, [respondToHoverTarget]);
+
+  const onGlobeClick = useCallback(
+    (coords: { lat: number; lng: number }) => {
+      const clickMaxDeg = 2.35;
+      for (const pt of points) {
+        if (!pt.isArea51) continue;
+        const d = angularDistanceDeg(coords.lat, coords.lng, pt.lat, pt.lng);
+        if (d <= clickMaxDeg) {
+          clearUfoTimeout();
+          setUfoActive(true);
+          track("globe_area51_ufo", { source: "click" });
+          ufoTimeout.current = setTimeout(() => setUfoActive(false), 2800);
+          return;
+        }
       }
     },
-    [clearUfoTimeout],
+    [clearUfoTimeout, points],
   );
 
   useEffect(() => () => clearUfoTimeout(), [clearUfoTimeout]);
@@ -269,8 +384,17 @@ export function GlobeTile({ span }: { span?: string }) {
       <div
         ref={containerRef}
         onPointerDown={() => setInteracted(true)}
+        onPointerMove={onPointerMoveGeo}
+        onPointerLeave={onPointerLeaveGeo}
         className="relative mt-4 aspect-square w-full overflow-hidden rounded-xl bg-black/85"
       >
+        {geoHover && geoLabelPos && (
+          <div
+            className="pointer-events-none absolute z-[15] max-w-[min(92%,220px)] -translate-x-1/2 -translate-y-full text-left"
+            style={{ left: geoLabelPos.x, top: geoLabelPos.y - 6 }}
+            dangerouslySetInnerHTML={{ __html: pointLabelHtml(geoHover) }}
+          />
+        )}
         {ufoActive && (
           <div
             className="pointer-events-none absolute inset-0 z-10 overflow-hidden"
@@ -312,14 +436,8 @@ export function GlobeTile({ span }: { span?: string }) {
               return "#ff5a1f";
             }}
             pointLabel={(d: unknown) => pointLabelHtml(d as GlobePoint)}
-            onPointHover={(p: unknown) => {
-              const point = p as { name: string; isHome?: boolean } | null;
-              if (point && !point.isHome) {
-                track("globe_city_hover", { city: point.name });
-              }
-              onPointHover(p);
-            }}
-            onPointClick={onPointClick}
+            pointerEventsFilter={pointerEventsFilter}
+            onGlobeClick={onGlobeClick}
           />
         )}
       </div>
