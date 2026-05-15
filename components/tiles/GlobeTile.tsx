@@ -200,10 +200,14 @@ export function GlobeTile({ span }: { span?: string }) {
     [clearUfoTimeout],
   );
 
-  /** Sprite billboards share large raycast hit areas; ignore points for picking. */
+  /**
+   * Ignore point sprites (billboard hitboxes) and flight arcs for picking.
+   * Arc objects use destination `name` (see hubArcsFromHome); hovering lines
+   * near SF would otherwise show those labels via the default arc tooltip.
+   */
   const pointerEventsFilter = useCallback((object: Object3D) => {
     const t = (object as unknown as { __globeObjType?: string }).__globeObjType;
-    return t !== "point";
+    return t !== "point" && t !== "arc";
   }, []);
 
   const flushGeoHover = useCallback(
@@ -423,6 +427,7 @@ export function GlobeTile({ span }: { span?: string }) {
             arcDashAnimateTime={arcMode === "trip" ? 1800 : 2200}
             arcStroke={arcMode === "trip" ? 0.28 : 0.4}
             arcAltitudeAutoScale={0.45}
+            arcLabel=""
             pointsData={points}
             pointLat="lat"
             pointLng="lng"
