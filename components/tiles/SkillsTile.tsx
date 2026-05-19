@@ -161,11 +161,15 @@ function PhysicsField({ skills }: { skills: readonly string[] }) {
         const styles = getComputedStyle(document.documentElement);
         const fg = styles.getPropertyValue("--color-fg").trim();
         const accent = styles.getPropertyValue("--color-accent-primary").trim();
-        const isDarkBg =
-          (document.documentElement.getAttribute("data-theme") ?? "light") !== "light";
+        const theme = document.documentElement.getAttribute("data-theme") ?? "light";
+        const isDarkBg = theme === "dark" || theme === "terminal";
         if (fg) palette.fg = fg;
         if (accent) palette.stroke = `color-mix(in oklab, ${accent} 55%, transparent)`;
-        palette.fill = isDarkBg ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.55)";
+        if (theme === "epaper") {
+          palette.fill = "rgba(0,0,0,0.05)";
+        } else {
+          palette.fill = isDarkBg ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.55)";
+        }
       };
       readPalette();
 

@@ -19,6 +19,7 @@ import {
   uniqueCountries,
   visitedCityCount,
 } from "@/config/travel";
+import { useDataTheme } from "@/hooks/useDataTheme";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { track } from "@/lib/track";
 import { cn } from "@/lib/cn";
@@ -80,6 +81,8 @@ function pointLabelHtml(d: GlobePoint): string {
 }
 
 export function GlobeTile({ span }: { span?: string }) {
+  const theme = useDataTheme();
+  const isEpaper = theme === "epaper";
   const reduced = useReducedMotion();
   const containerRef = useRef<HTMLDivElement>(null);
   const globeRef = useRef<GlobeMethods | undefined>(undefined);
@@ -166,6 +169,22 @@ export function GlobeTile({ span }: { span?: string }) {
   const arcColor = useCallback(
     (d: unknown) => {
       const o = d as { mode?: string };
+      if (isEpaper) {
+        if (arcMode === "hub") {
+          return ["rgba(28,28,28,0.85)", "rgba(28,28,28,0.08)"] as unknown as string;
+        }
+        const m = (o.mode || "").toLowerCase();
+        if (m.includes("train") || m.includes("bullet")) {
+          return ["rgba(60,60,60,0.8)", "rgba(60,60,60,0.1)"] as unknown as string;
+        }
+        if (m.includes("car")) {
+          return ["rgba(90,90,90,0.75)", "rgba(90,90,90,0.1)"] as unknown as string;
+        }
+        if (m.includes("seaplane")) {
+          return ["rgba(45,45,45,0.8)", "rgba(45,45,45,0.1)"] as unknown as string;
+        }
+        return ["rgba(28,28,28,0.75)", "rgba(28,28,28,0.08)"] as unknown as string;
+      }
       if (arcMode === "hub") {
         return ["rgba(255,90,31,0.95)", "rgba(255,90,31,0.1)"] as unknown as string;
       }
@@ -181,7 +200,7 @@ export function GlobeTile({ span }: { span?: string }) {
       }
       return ["rgba(255,90,31,0.9)", "rgba(255,90,31,0.1)"] as unknown as string;
     },
-    [arcMode],
+    [arcMode, isEpaper],
   );
 
   const respondToHoverTarget = useCallback(
@@ -390,7 +409,10 @@ export function GlobeTile({ span }: { span?: string }) {
         onPointerDown={() => setInteracted(true)}
         onPointerMove={onPointerMoveGeo}
         onPointerLeave={onPointerLeaveGeo}
-        className="relative mt-4 aspect-square w-full overflow-hidden rounded-xl bg-black/85"
+        className={cn(
+          "relative mt-4 aspect-square w-full overflow-hidden rounded-xl",
+          isEpaper ? "bg-[var(--color-bg-2)]" : "bg-black/85",
+        )}
       >
         {geoHover && geoLabelPos && (
           <div
@@ -418,8 +440,8 @@ export function GlobeTile({ span }: { span?: string }) {
             backgroundColor="rgba(0,0,0,0)"
             globeImageUrl={GLOBE_IMAGE}
             bumpImageUrl={BUMP_IMAGE}
-            atmosphereColor="#ff5a1f"
-            atmosphereAltitude={0.18}
+            atmosphereColor={isEpaper ? "#6b6b6b" : "#ff5a1f"}
+            atmosphereAltitude={isEpaper ? 0.08 : 0.18}
             arcsData={arcs}
             arcColor={arcColor}
             arcDashLength={arcMode === "trip" ? 0.35 : 0.4}
@@ -435,6 +457,12 @@ export function GlobeTile({ span }: { span?: string }) {
             pointRadius="size"
             pointColor={(d: unknown) => {
               const p = d as GlobePoint;
+              if (isEpaper) {
+                if (p.isHome) return "#1c1c1c";
+                if (p.isSloHome) return "#4a4a4a";
+                if (p.isArea51) return "#5c5c5c";
+                return "#2a2a2a";
+              }
               if (p.isHome) return "#ffffff";
               if (p.isSloHome) return "#fbbf24";
               if (p.isArea51) return "#6ee7b7";

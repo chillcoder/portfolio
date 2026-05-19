@@ -45,7 +45,7 @@ export function SpotifyTile({ span }: { span?: string }) {
               rel="noopener noreferrer"
               className="group flex flex-col gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-tile)] p-3 transition hover:bg-[var(--color-tile-hover)]"
             >
-              <div className="relative aspect-square w-full overflow-hidden rounded-lg">
+              <div className="epaper-dither relative aspect-square w-full overflow-hidden rounded-lg">
                 {now?.albumImage ? (
                   <Image
                     src={now.albumImage}
@@ -93,7 +93,7 @@ export function SpotifyTile({ span }: { span?: string }) {
                 {spotifyTrendsEmptyMessage(top.trendsIssue, top.spotifyHttp)}
               </p>
             ) : (
-              <ul className="flex min-w-0 max-w-full gap-2 overflow-x-auto pb-1">
+              <ul className="epaper-dither flex min-w-0 max-w-full gap-2 overflow-x-auto pb-1">
                 {top.topTracks.slice(0, 5).map((t) => (
                   <li key={t.url} className="shrink-0">
                     <a
@@ -148,7 +148,7 @@ export function SpotifyTile({ span }: { span?: string }) {
                 {spotifyTrendsEmptyMessage(top.trendsIssue, top.spotifyHttp)}
               </p>
             ) : (
-              <ul className="flex min-w-0 max-w-full gap-2 overflow-x-auto pb-1">
+              <ul className="epaper-dither flex min-w-0 max-w-full gap-2 overflow-x-auto pb-1">
                 {top.topArtists.slice(0, 5).map((a) => (
                   <li key={a.url} className="shrink-0">
                     <a

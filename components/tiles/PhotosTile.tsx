@@ -114,7 +114,7 @@ export function PhotosTile({ span }: { span?: string }) {
         {isLoading && !data ? (
           <TileSkeleton lines={4} />
         ) : displayed.length ? (
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-5 sm:gap-1.5">
+          <div className="epaper-dither grid grid-cols-2 gap-2 sm:grid-cols-5 sm:gap-1.5">
             {displayed.map((p, i) => (
               <button
                 key={`${i}-${p.id}`}

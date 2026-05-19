@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { track } from "@/lib/track";
 
-type Theme = "light" | "dark" | "terminal";
+type Theme = "light" | "dark" | "terminal" | "epaper";
 
 const THEMES: ReadonlyArray<{
   id: Theme;
@@ -30,10 +30,21 @@ const THEMES: ReadonlyArray<{
     glyph: ">_",
     swatch: { bg: "#050805", fg: "#b8ffc6", accent: "#33ff66" },
   },
+  {
+    id: "epaper",
+    label: "E-paper",
+    glyph: "▤",
+    swatch: { bg: "#eae6dc", fg: "#1c1c1c", accent: "#1a1a1a" },
+  },
 ];
 
 function isTheme(value: string | null): value is Theme {
-  return value === "light" || value === "dark" || value === "terminal";
+  return (
+    value === "light" ||
+    value === "dark" ||
+    value === "terminal" ||
+    value === "epaper"
+  );
 }
 
 export function ThemeToggle() {
@@ -96,7 +107,7 @@ export function ThemeToggle() {
         <div
           role="menu"
           aria-label="Theme picker"
-          className="absolute right-0 top-[calc(100%+8px)] z-[60] w-44 overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-1 shadow-lg"
+          className="absolute right-0 top-[calc(100%+8px)] z-[60] w-48 overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-1 shadow-lg"
         >
           {THEMES.map((t) => {
             const active = t.id === theme;
