@@ -147,8 +147,8 @@
     mix-blend-mode: multiply;
   }
 
-  .epaper-dither img,
-  .epaper-dither picture {
+  :root[data-theme="epaper"] .epaper-dither img,
+  :root[data-theme="epaper"] .epaper-dither picture {
     filter: grayscale(1) contrast(1.14) brightness(0.97);
   }
 
