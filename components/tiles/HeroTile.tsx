@@ -48,9 +48,12 @@ export function HeroTile({ span }: { span?: string }) {
               {letters}
             </span>
           </h1>
-          <p className="max-w-md text-balance text-sm text-[var(--color-fg-muted)] md:text-base">
-            {PROFILE.title}. {PROFILE.bio}
-          </p>
+          <div className="flex max-w-md flex-col gap-2 text-balance text-sm text-[var(--color-fg-muted)] md:text-base">
+            <p>
+              {PROFILE.title}. {PROFILE.bio}
+            </p>
+            <p className="text-[var(--color-fg-muted)]">{PROFILE.heroTagline}</p>
+          </div>
         </div>
       </div>
     </Tile>

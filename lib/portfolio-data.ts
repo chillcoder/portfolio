@@ -21,7 +21,8 @@ export const PROFILE = {
   domain: "lucas-obrien.com",
   email: "lucasobrien123@gmail.com",
   careerStart: new Date("2019-08-01"),
-  bio: "Senior CSM at Juniper Square, with a concurrent applied-AI role shipping internal tools in Claude Code. I connect revenue and retention goals to shipped apps for CS and GTM.",
+  bio: "Senior CSM at Juniper Square, with a concurrent applied-AI role shipping internal tools in Claude Code.",
+  heroTagline: "Your local bar trivia enthusiast",
   socials: {
     github: "https://github.com/chillcoder",
     twitter: "https://x.com/lucas_obrien",
