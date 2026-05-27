@@ -64,6 +64,7 @@ const PLACES = {
   hakone: { name: "Hakone", country: "Japan", lat: 35.2322, lng: 139.038 },
   tokyo: { name: "Tokyo", country: "Japan", lat: 35.6762, lng: 139.6503 },
   nyc: { name: "New York City", country: "USA", lat: 40.7128, lng: -74.006 },
+  guilfordCt: { name: "Guilford, CT", country: "USA", lat: 41.2812, lng: -72.6812 },
   nyeMt: { name: "Nye, MT", country: "USA", lat: 46.0249, lng: -109.8499 },
   batonRouge: { name: "Baton Rouge", country: "USA", lat: 30.4515, lng: -91.1871 },
   nashville: { name: "Nashville", country: "USA", lat: 36.1627, lng: -86.7816 },
@@ -118,6 +119,10 @@ export const TRIP_ROUTE_LEGS: TripLeg[] = [
   leg(PLACES.seward, PLACES.glacierView, "car"),
   leg(SF, PLACES.bigIsland, "plane"),
   leg(SF, PLACES.bigIsland, "plane"),
+  leg(SF, PLACES.nyc, "plane"),
+  leg(PLACES.nyc, PLACES.guilfordCt, "car"),
+  leg(PLACES.guilfordCt, PLACES.nyc, "car"),
+  leg(PLACES.nyc, SF, "plane"),
 ];
 
 /** SF → same city multiple times (visit counts). Costa Rica ×3 included here. */
