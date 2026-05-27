@@ -81,6 +81,7 @@ const PLACES = {
   coeurDalene: { name: "Coeur d'Alene", country: "USA", lat: 47.6777, lng: -116.7805 },
   jacksonWy: { name: "Jackson", country: "USA", lat: 43.4799, lng: -110.7624 },
   bigIsland: { name: "Hawaiʻi (Big Island)", country: "USA", lat: 19.64, lng: -155.9969 },
+  kauai: { name: "Kauaʻi", country: "USA", lat: 22.0964, lng: -159.5261 },
 } as const satisfies Record<string, TravelCoord>;
 
 function leg(
@@ -119,6 +120,7 @@ export const TRIP_ROUTE_LEGS: TripLeg[] = [
   leg(PLACES.seward, PLACES.glacierView, "car"),
   leg(SF, PLACES.bigIsland, "plane"),
   leg(SF, PLACES.bigIsland, "plane"),
+  leg(SF, PLACES.kauai, "plane"),
   leg(SF, PLACES.nyc, "plane"),
   leg(PLACES.nyc, PLACES.guilfordCt, "car"),
   leg(PLACES.guilfordCt, PLACES.nyc, "car"),
